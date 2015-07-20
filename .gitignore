@@ -1,0 +1,5 @@
+# Compiled source #
+###################
+vectorWmsOtn/platforms/android/assets/**
+vectorWmsOtn/platforms/android/build/**
+geolocationDemo/**
