@@ -192,8 +192,8 @@ define(['ol', 'dc', 'toolbar', 'layermanager', 'SparqlJson', 'query', 'search', 
 
 
         module.value('default_view', new ol.View({
-            center: [1490321.6967438285, 6400602.013496143], //Latitude longitude    to Spherical Mercator
-            zoom: 14,
+            center: ol.proj.transform([16.6, 49.2], 'EPSG:4326', 'EPSG:3857'),// OlMap.map.getView().getProjection()), //Latitude longitude    to Spherical Mercator
+            zoom: 13,
             units: "m"
         }));
 
