@@ -49,6 +49,10 @@ define(['angular', 'ol'],
                         },
                         gpsStatus: true
                     };
+                    
+                    me.set_center = function () {
+                        OlMap.map.getView().setCenter(me.last_location);
+                    };
 
                     var accuracyFeature = new ol.Feature();
                                         
@@ -57,16 +61,14 @@ define(['angular', 'ol'],
                     // if (navigator.geolocation) {
                     me.geolocation = navigator.geolocation;
 
-                    var startGpsWatch = function () {
+                    me.startGpsWatch = function () {
                         if (navigator.geolocation) {
-                            console.log('GPS started.');
                             me.gpsStatus = true;
                             me.changed_handler();
                         }
                     };
                     
-                    var stopGpsWatch = function () {
-                        console.log('GPS stopped.');
+                    me.stopGpsWatch = function () {
                         me.gpsStatus = false;
                         me.geolocation.clearWatch(me.changed_handler);
                     };
@@ -76,34 +78,28 @@ define(['angular', 'ol'],
                     };
 
                     var gpsOkCallback = function (position) {
-                        console.log('GPS position found.');
                         me.accuracy = position.coords.accuracy ? position.coords.accuracy + ' [m]' : '';
                         me.altitude = position.coords.altitude ? position.coords.altitude + ' [m]' : '-';
                         me.heading = position.coords.heading ? position.coords.heading : null;
                         me.speed = position.coords.speed ? position.coords.speed + ' [m/s]' : '-';
-                            me.changed
-                        var p = ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', OlMap.map.getView().getProjection());
-                        console.log(p);
+                        me.last_location = ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', OlMap.map.getView().getProjection());
                         if (!positionFeature.setGeometry()) {
-                            positionFeature.setGeometry(new ol.geom.Point(p));
+                            positionFeature.setGeometry(new ol.geom.Point(me.last_location));
                         } else {
-                            positionFeature.getGeometry().setCoordinates(p);
+                            positionFeature.getGeometry().setCoordinates(me.last_location);
                         }
                         
                         if (!accuracyFeature.setGeometry()) {
-                            accuracyFeature.setGeometry(new ol.geom.Circle(p, position.coords.accuracy));
+                            accuracyFeature.setGeometry(new ol.geom.Circle(me.last_location, position.coords.accuracy));
                         } else {
-                            accuracyFeature.getGeometry().setCenterAndRadius(p, me.accuracy);
+                           accuracyFeature.getGeometry().setCenterAndRadius(me.last_location, me.accuracy);
                         }
 
                         if (me.following) {
-                            OlMap.map.getView().setCenter(p);
-                            console.log('Setting center of the map to: ' + p);
+                            me.set_center();
                         }
                         
                         $rootScope.$broadcast('geolocation.updated');
-                        console.log(me.following);
-                        console.log(me.accuracy);
                     };
 
                     var gpsFailCallback = function (e) {
@@ -117,7 +113,7 @@ define(['angular', 'ol'],
                         maximumAge: 100000
                     };
 
-                    startGpsWatch();
+                    me.startGpsWatch();
 
                     me.style = new ol.style.Style({
                         image: new ol.style.Circle({
@@ -146,7 +142,6 @@ define(['angular', 'ol'],
                         features: []
                     });
 
-
                     return me;
                 }])
         
@@ -163,16 +158,19 @@ define(['angular', 'ol'],
                     if (arguments.length === 0) {
                         return service.gpsStatus;
                     } else {
-                        service.geolocation.startGpsWatch();
+                        service.startGpsWatch();
                     }
                 };
 
                 $scope.following = function (set_to) {
                     if (arguments.length === 0) {
                         return service.following;
+                        console.log('Success!');
                     } else {
                         service.following = set_to;
-                        service.changed_handler();
+                        if (service.following === true) {
+                            service.set_center();
+                        }
                     }
                 };
 
