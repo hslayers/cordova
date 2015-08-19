@@ -27,23 +27,71 @@
             * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
-        <meta http-equiv="Content-Security-Policy" content="'img-src' 'self' *.tile.osm.org *.tiles.mapbox.com data:; style-src 'self' 'unsafe-inline'; media-src *">
+        <meta http-equiv="Content-Security-Policy" content="'img-src' 'self' *.tile.osm.org *.tiles.mapbox.com data:; style-src 'self' 'unsafe-inline'; media-src *; 'default-src'">
         -->
-        <link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+        <!-- <script type="text/javascript" src="js/index.js"></script> -->
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript">
+            function onLoad() {
+                document.addEventListener("deviceready", onDeviceReady, false);
+            }
+
+            function onDeviceReady() {
+                // now it's safe
+                alert('App initialized.');
+                
+                /* var head = document.getElementsByTagName('head')[0];
+                var script = document.createElement('script');
+                
+                script.type = 'text/javascript';
+                script.src = 'js/jquery.min.js';-->
+                head.appendChild(script);
+                
+                script.type = 'text/javascript';
+                script.src = 'js/require.js';
+                head.appendChild(script);
+                
+                script.type = 'text/javascript';
+                script.src = 'js/hslayers.js';
+                head.appendChild(script);
+                
+                script.type = 'text/javascript';
+                script.src = 'js/geolocation_logging.js';
+                head.appendChild(script);
+                
+                script.type = 'text/javascript';
+                script.src = 'js/app.js';
+                head.appendChild(script); */
+            }
+        </script>
+        <!-- <link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css"> -->
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-        <title>Traffic Accidents</title>
+        <title>Smart Tourist Data</title>
     </head>
-    <body>
+    <body onLoad="onLoad()">
         <!-- <script type="text/javascript" src="cordova.js"></script> -->
         <div class="app">
             <div hs ng-app="hs" ng-controller="Main" style="position: relative;"></div>
         </div>
-        <!-- <script src="js/app.js"></script> -->
-        <script src="js/index.js"></script>
-        <script src="js/jquery.min.js"></script>
-        <script src="js/require.js"></script>  
-        <script src="js/hslayers.js"></script>
+        
+        <script type="text/javascript">
+            var use_proxy = false;
+        </script>
+        <script type="text/javascript" src="js/require.js"></script> 
+        <script type="text/javascript" src="js/geolocation_logging.js"></script>
+        
+        <script type="text/javascript">
+            var db = window.openDatabase("tracking", "0.1", "Geolocation log", 1000000);
+            var db_id = 1;
+
+            console.log('Database created.');
+        </script>
+        
+        <script type="text/javascript" src="js/hslayers.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
     </body>
 </html>

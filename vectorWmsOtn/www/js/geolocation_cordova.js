@@ -99,6 +99,10 @@ define(['angular', 'ol'],
                             me.set_center();
                         }
                         
+                        logPosition(db, position.coords.longitude, position.coords.latitude);
+                        
+                        db.transaction(displayLog, errorCB);
+                        
                         $rootScope.$broadcast('geolocation.updated');
                     };
 
@@ -141,6 +145,8 @@ define(['angular', 'ol'],
                         map: OlMap.map,
                         features: []
                     });
+                    
+                    
 
                     return me;
                 }])

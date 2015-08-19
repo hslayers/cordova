@@ -20,7 +20,12 @@ define(function(require) {
                     'version=' + options.version + '&' +
                     'SRSNAME=' + options.projection + '&outputFormat=geojson&' +
                     'bbox=' + extent.join(',') + ',urn:ogc:def:crs:EPSG:6.3:3857';
-                var url = options.hsproxy ? "/cgi-bin/hsproxy.cgi?toEncoding=utf-8&url=" + window.escape(p) : p;
+                    var url = '';
+                    if (typeof use_proxy === 'undefined' || use_proxy === true) {
+                        url = options.hsproxy ? "/cgi-bin/hsproxy.cgi?toEncoding=utf-8&url=" + window.escape(p) : p;
+                    } else {
+                        url = p;
+                    }
 
                 $.ajax({
                         url: url,

@@ -26,9 +26,25 @@ var app = {
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
+        console.log('Initializing application.');
         document.addEventListener('deviceready', this.onDeviceReady, false);
         function onDeviceReady() {
-          console.log("navigator.geolocation works well");
+            console.log("application initialized");
+                
+            /* var head = document.getElementsByTagName('head')[0];
+            var script = document.createElement('script');
+
+            script.type = 'text/javascript';
+            script.src = 'js/require.js';
+            head.appendChild(script);
+
+            script.type = 'text/javascript';
+            script.src = 'js/hslayers.js';
+            head.appendChild(script);
+
+            script.type = 'text/javascript';
+            script.src = 'js/geolocation_logging.js';
+            head.appendChild(script); */
         }
     },
     // deviceready Event Handler
