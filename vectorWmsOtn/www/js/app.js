@@ -1,1 +1,1 @@
-/home/sleitgeb/prace/Projects/hslayers-ng/examples/geosparql/app.js
+/home/sleitgeb/prace/Projects/hslayers-ng/examples/compositions/app.js

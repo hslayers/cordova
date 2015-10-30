@@ -8,25 +8,14 @@ define(['angular', 'ol'],
         angular.module('hs.geolocation', ['hs.map'])
             .directive('hs.geolocation.directive', ['hs.map.service', 'hs.geolocation.service', 'Core', function(OlMap, Geolocation, Core) {
                 return {
-                    templateUrl: hsl_path + 'components/geolocation/partials/geolocation.html',
+                    templateUrl: hsl_path + 'components/geolocation/partials/geolocation_cordova.html',
                     link: function link(scope, element, attrs) {
                         element.appendTo($(".ol-overlaycontainer-stopevent"));
-                        $('.locate .blocate').click(function() {
-                            $('.locate').toggleClass('ol-collapsed');
-                            Geolocation.geolocation.startGpsWatch;
-                            Geolocation.toggleFeatures(!$('.locate').hasClass('ol-collapsed'));
+                        $('.blocate').click(function() {
+                            $('.locate-mobile').toggleClass('ol-collapsed');
+                            Geolocation.toggleGps();
+                            Geolocation.toggleFeatures(!$('.locate-mobile').hasClass('ol-collapsed'));
                         });
-                        if (Core.panel_side === 'left') {
-                            $('.locate').css({
-                                right: '.5em'
-                            });
-                        }
-                        if (Core.panel_side === 'right') {
-                            $('.locate').css({
-                                right: 'auto',
-                                left: '.2em'
-                            });
-                        }
                     },
                     replace: true
                 };
@@ -47,7 +36,8 @@ define(['angular', 'ol'],
 
                             }
                         },
-                        gpsStatus: true
+                        gpsStatus: false,
+                        changed_handler: null,
                     };
                     
                     me.set_center = function () {
@@ -60,28 +50,35 @@ define(['angular', 'ol'],
 
                     // if (navigator.geolocation) {
                     me.geolocation = navigator.geolocation;
+                    
+                    me.toggleGps = function () {
+                        if (me.gpsStatus === false) {
+                            console.log('Starting GPS.');
+                            me.startGpsWatch();
+                        } else if (me.gpsStatus === true) {
+                            console.log('Stopping GPS.');
+                            me.stopGpsWatch();
+                        }
+                    }
 
                     me.startGpsWatch = function () {
                         if (navigator.geolocation) {
                             me.gpsStatus = true;
-                            me.changed_handler();
+                            me.changed_handler = me.geolocation.watchPosition(gpsOkCallback, gpsFailCallback, gpsOptions);
                         }
                     };
                     
                     me.stopGpsWatch = function () {
                         me.gpsStatus = false;
                         me.geolocation.clearWatch(me.changed_handler);
-                    };
-                    
-                    me.changed_handler = function () {
-                        me.geolocation.watchPosition(gpsOkCallback, gpsFailCallback, gpsOptions);
+                        me.changed_handler = null;
                     };
 
                     var gpsOkCallback = function (position) {
-                        me.accuracy = position.coords.accuracy ? position.coords.accuracy + ' [m]' : '';
-                        me.altitude = position.coords.altitude ? position.coords.altitude + ' [m]' : '-';
+                        me.accuracy = position.coords.accuracy ? Math.round(position.coords.accuracy) : '-';
+                        me.altitude = position.coords.altitude ? Math.round(position.coords.altitude) : '-';
                         me.heading = position.coords.heading ? position.coords.heading : null;
-                        me.speed = position.coords.speed ? position.coords.speed + ' [m/s]' : '-';
+                        me.speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : '-';
                         me.last_location = ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', OlMap.map.getView().getProjection());
                         if (!positionFeature.setGeometry()) {
                             positionFeature.setGeometry(new ol.geom.Point(me.last_location));
@@ -117,8 +114,6 @@ define(['angular', 'ol'],
                         timeout: 10000,
                         maximumAge: 100000
                     };
-
-                    me.startGpsWatch();
 
                     me.style = new ol.style.Style({
                         image: new ol.style.Circle({
@@ -162,8 +157,10 @@ define(['angular', 'ol'],
                 $scope.gpsActive = function (set_to) {
                     if (arguments.length === 0) {
                         return service.gpsStatus;
+                        console.log('arguments = 0');
                     } else {
                         service.startGpsWatch();
+                        console.log('Starting GPS.');
                     }
                 };
 
