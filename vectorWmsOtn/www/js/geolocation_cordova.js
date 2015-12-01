@@ -27,13 +27,15 @@ define(['angular', 'ol'],
                         following: false,
                         geolocation: null,
                         toggleFeatures: function(visible) {
+                            var src = me.position_layer.getSource();
                             if (visible) {
-                                featuresOverlay.addFeature(accuracyFeature);
-                                featuresOverlay.addFeature(positionFeature);
+                                OlMap.map.addLayer(me.position_layer);
+                                src.addFeature(accuracyFeature);
+                                src.addFeature(positionFeature);
                             } else {
-                                featuresOverlay.removeFeature(accuracyFeature);
-                                featuresOverlay.removeFeature(positionFeature);
-
+                                src.removeFeature(accuracyFeature);
+                                src.removeFeature(positionFeature);
+                                OlMap.map.removeLayer(me.position_layer);
                             }
                         },
                         gpsStatus: false,
@@ -137,10 +139,10 @@ define(['angular', 'ol'],
                     positionFeature.setStyle(me.style);
 
 
-                    var featuresOverlay = new ol.FeatureOverlay({
-                        map: OlMap.map,
-                        features: []
-                    });
+                    // var featuresOverlay = new ol.FeatureOverlay({
+                    //     map: OlMap.map,
+                    //     features: []
+                    // });
                     
                     return me;
                 }])

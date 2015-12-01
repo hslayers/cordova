@@ -1,0 +1,144 @@
+.mobile#toolbar {
+    display: table;
+    left: 2px;
+    top: auto;
+    position: absolute;
+    bottom: 3px;
+    width: 100%;
+}
+
+.ol-zoom {
+    right: 0em !important;
+    left: auto !important;
+    top: calc(50% - 4em);
+    bottom: auto;
+    background-color: #ccc !important;
+}
+
+.ol-control .ol-zoom-out, .ol-control .ol-zoom-in {
+    border-radius: 0;
+    width: 2em;
+    height: 2em;
+    font-size: 2em;
+    background-color: #fff;
+    color: #333;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.ol-control.ol-attribution {
+    background-color: #ddd;
+}
+
+.ol-control button {
+    background: #fff;
+    
+    color: #333;
+}
+
+.ol-control .ol-zoom-out {
+    margin-top: 1px;
+    margin-bottom: 0;
+}
+
+.ol-control .ol-zoom-in {
+    margin-top: 0;
+    margin-bottom: 1px;
+}
+
+/* .ol-control .ol-zoom-in:hover, .ol-control .ol-zoom-out:hover, .ol-control .ol-zoom-in:hover:active, .ol-control .ol-zoom-out:hover:active, .ol-control .ol-zoom-in:focus:active, .ol-control .ol-zoom-out:focus:active {
+    background-color: #eee;
+}
+
+.ol-control .ol-zoom-in:focus, .ol-control .ol-zoom-out:focus {
+    background-color: #fff;
+} */
+
+button:hover, button:hover:active, button:focus:active {
+    background-color: #eee !important;
+}
+
+button:focus {
+    background-color: #fff !important;
+}
+
+.ol-scale-line {
+    background: rgba(255,255,255,.7);
+}
+
+.ol-scale-line-inner {
+    border: 1px solid #666;
+    border-top: none;
+    color: #666;
+}
+
+.mobile#toolbar .btn {
+    border-radius: 0px;
+    vertical-align: bottom;
+    margin: -3px -2px;
+    padding: 0px;
+    font-size: 1.5em;
+    height: 3em;
+    width: calc(25% + 1px);
+    display: none;
+}
+
+.locate {
+    display: none;
+}
+
+.mobile#toolbar .btn-mobile, .mobile#toolbar .btn-mobile-only {
+    display: table-cell;
+}
+
+.toolbar-buttons {
+    display: inline-block;
+}
+
+.mobile .toolbar-buttons {
+    display: block;
+}
+
+.locate-mobile.ol-control {
+    bottom: .1em;
+    width: 12em;
+    right: .1em;
+    background: rgba(255,255,255, .8);
+}
+
+.locate-mobile:not(.ol-collapsed) {
+    background: rgba(255,255,255, .8);
+}
+
+.locate-mobile ul {
+    list-style: none;
+    float: left;
+}
+
+#map {
+    height: calc(100% - 4.5em) !important;
+}
+
+#page-wrapper, #content-wrapper, .page-content {
+    height: 100%;
+}
+
+.locate-mobile.ol-collapsed {
+    display: none;
+}
+
+.search-container {
+    position: absolute;
+    bottom: 4.5em;
+    width: 100%;
+}
+
+.mobile#toolbar span, .mobile#toolbar i {
+    width: 1em;
+    height: 1em;
+}
+
+.locate-mobile ul {
+    padding-left: .5em;
+    margin-bottom: .25em;
+}

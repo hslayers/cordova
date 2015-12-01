@@ -2,4 +2,12 @@
 ###################
 vectorWmsOtn/platforms/android/assets/**
 vectorWmsOtn/platforms/android/build/**
+vectorWmsOtn/platforms/android/cordova-plugin-crosswalk-webview/**
+vectorWmsOtn/plugins/cordova-plugin-crosswalk-webview/**
+vectorWmsOtn/platforms/android/src/org/crosswalk/**
 geolocationDemo/**
+vectorWmsOtn.sublime-project
+vectorWmsOtn.sublime-workspace
+vectorWmsOtn/temporary/**
+vectorWmsOtn/www/node_modules/**
+vectorWmsOtn/www/bower_components/**
