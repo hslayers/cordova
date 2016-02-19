@@ -49,7 +49,8 @@ function errorCB(err) {
 // Transaction success callback
 //
 function successCB() {
-    db.transaction(queryDB, errorCB);
+    console.log("Transaction successful.");
+    // db.transaction(queryDB, errorCB);
 }
 
 console.log('GPS logger loaded.');

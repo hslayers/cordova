@@ -1,10 +1,23 @@
-.mobile#toolbar {
+.mobile#menu {
     display: table;
     left: 2px;
     top: auto;
     position: absolute;
     bottom: 3px;
     width: 100%;
+    z-index: 999;
+}
+
+.mobile.panelspace {
+    display: none;
+}
+
+.mobile #toolbar {
+    display: none;
+}
+
+.mobile #map {
+    width: 100% !important;
 }
 
 .ol-zoom {
@@ -72,7 +85,7 @@ button:focus {
     color: #666;
 }
 
-.mobile#toolbar .btn {
+.mobile#menu .btn {
     border-radius: 0px;
     vertical-align: bottom;
     margin: -3px -2px;
@@ -87,7 +100,7 @@ button:focus {
     display: none;
 }
 
-.mobile#toolbar .btn-mobile, .mobile#toolbar .btn-mobile-only {
+.mobile#menu .btn-mobile, .mobile#menu .btn-mobile-only, .mobile#menu .menu-item {
     display: table-cell;
 }
 
@@ -133,7 +146,7 @@ button:focus {
     width: 100%;
 }
 
-.mobile#toolbar span, .mobile#toolbar i {
+.mobile#menu span, .mobile#menu i {
     width: 1em;
     height: 1em;
 }
@@ -141,4 +154,10 @@ button:focus {
 .locate-mobile ul {
     padding-left: .5em;
     margin-bottom: .25em;
+}
+
+@media (max-width: 800px) {
+    .sb-right.open #map {
+        margin-left: 0px;
+    }
 }

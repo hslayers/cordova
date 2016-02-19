@@ -138,6 +138,12 @@ define(['angular', 'ol'],
                     accuracyFeature.setStyle(me.style);
                     positionFeature.setStyle(me.style);
 
+                    me.position_layer = new ol.layer.Vector({
+                        title: "Position",
+                        show_in_manager: false,
+                        source: new ol.source.Vector()
+                    });
+
 
                     // var featuresOverlay = new ol.FeatureOverlay({
                     //     map: OlMap.map,

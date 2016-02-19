@@ -42,6 +42,17 @@
                 db = window.openDatabase("tracking", "0.1", "Geolocation log", 200000);
                 db_id = 0;
                 db.transaction(createLog, errorCB, successCB);
+
+                document.addEventListener("backbutton", function(e){
+                    navigator.app.exitApp();
+                //    if($.mobile.activePage.is('#homepage')){
+                //        e.preventDefault();
+                //        navigator.app.exitApp();
+                //    }
+                //    else {
+                //        navigator.app.backHistory()
+                //    }
+                }, false);
             }
         </script>
         <!-- <link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css"> -->
