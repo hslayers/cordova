@@ -1,19 +1,27 @@
+.mobile button {
+    outline: none !important;
+}
+
 .mobile#menu {
     display: table;
-    left: 2px;
+    /*left: 2px;*/
     top: auto;
     position: absolute;
-    bottom: 3px;
+    /*bottom: 3px;*/
     width: 100%;
     z-index: 999;
 }
 
-.mobile.panelspace {
-    display: none;
+.mobile #toolbar.show {
+    display: inline-block;
 }
 
 .mobile #toolbar {
     display: none;
+    bottom: 4.5em;
+    top: initial;
+    left: 0;
+    width: 100%;
 }
 
 .mobile #map {
@@ -45,7 +53,6 @@
 
 .ol-control button {
     background: #fff;
-    
     color: #333;
 }
 
@@ -86,13 +93,14 @@ button:focus {
 }
 
 .mobile#menu .btn {
+    border: none;
     border-radius: 0px;
     vertical-align: bottom;
-    margin: -3px -2px;
+    /*margin: -3px -2px;*/
     padding: 0px;
     font-size: 1.5em;
     height: 3em;
-    width: calc(25% + 1px);
+    width: 25%;
     display: none;
 }
 
@@ -140,12 +148,6 @@ button:focus {
     display: none;
 }
 
-.search-container {
-    position: absolute;
-    bottom: 4.5em;
-    width: 100%;
-}
-
 .mobile#menu span, .mobile#menu i {
     width: 1em;
     height: 1em;
@@ -160,4 +162,48 @@ button:focus {
     .sb-right.open #map {
         margin-left: 0px;
     }
+}
+
+.mobile .input-group, .mobile #search_address {
+    display: table;
+    position: relative;
+    height: 3em;
+    width: 100%;
+}
+
+.mobile #toolbar .input-group-btn {
+    display: none;
+}
+
+.mobile #searchresults {
+    position: absolute;
+    bottom: 3em;
+    top: initial;
+    width: 100%;
+}
+
+.mobile .panelspace-opened:not(.panelspace) {
+    transform: translate(-75%, 0);
+}
+
+.mobile .panelspace-opened.panelspace {
+    width: 75% !important;
+}
+
+.mobile .panelspace {
+    width: 0% !important;
+}
+
+.mobile .panelspace-wrapper {
+    width: 100% !important;
+}
+
+.mobile #sidebar, .mobile .mid-pane, .mobile button.close {
+    display: none;
+}
+
+.mobile #panelplace {
+    margin-left: 0 !important;
+    width: 100% !important;
+    height: initial !important;
 }

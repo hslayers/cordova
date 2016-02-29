@@ -1,5 +1,6 @@
 # Compiled source #
 ###################
+vectorWmsOtn/platforms/android/**
 vectorWmsOtn/platforms/android/assets/**
 vectorWmsOtn/platforms/android/build/**
 vectorWmsOtn/platforms/android/cordova-plugin-crosswalk-webview/**
@@ -11,3 +12,4 @@ vectorWmsOtn.sublime-workspace
 vectorWmsOtn/temporary/**
 vectorWmsOtn/www/node_modules/**
 vectorWmsOtn/www/bower_components/**
+showcase-app/**
