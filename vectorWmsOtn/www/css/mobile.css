@@ -158,11 +158,15 @@ button:focus {
     margin-bottom: .25em;
 }
 
-@media (max-width: 800px) {
+.mobile.sb-left div#map, .mobile.sb-right div#map {
+    margin-left: 0px;
+}
+
+/*@media (max-width: 800px) {
     .sb-right.open #map {
         margin-left: 0px;
     }
-}
+}*/
 
 .mobile .input-group, .mobile #search_address {
     display: table;
@@ -182,8 +186,20 @@ button:focus {
     width: 100%;
 }
 
-.mobile .panelspace-opened:not(.panelspace) {
+.mobile.sb-right .panelspace-opened:not(.panelspace) {
     transform: translate(-75%, 0);
+}
+
+.mobile.sb-left .panelspace-opened:not(.panelspace) {
+    transform: translate(75%, 0);
+}
+
+.mobile #menu.panelspace-opened button:not(.menu-switch) {
+    display: none;
+}
+
+.mobile #menu:not(.panelspace-opened) button.menu-switch {
+    display: none;
 }
 
 .mobile .panelspace-opened.panelspace {
@@ -202,7 +218,7 @@ button:focus {
     display: none;
 }
 
-.mobile #panelplace {
+.mobile #panelplace, .mobile div#sidebar ~ div#panelplace {
     margin-left: 0 !important;
     width: 100% !important;
     height: initial !important;

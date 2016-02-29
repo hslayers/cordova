@@ -8,6 +8,7 @@ function createLog(tx) {
 
 function logPosition(tx) {
     tx.executeSql('INSERT INTO LOCATIONDEMO (id, lon, lat) VALUES (' + db_id.toString() + ', ' + lon + ', ' + lat + ')');
+    console.log(db_id, lon, lat);
     // tx.executeSql('INSERT INTO LOCATIONDEMO (id, lon, lat) VALUES (4, 18.408, 49.716)');
 }
 
