@@ -1,3 +1,7 @@
+* {
+    transition: transform 0.5s;
+}
+
 .mobile button {
     outline: none !important;
 }
@@ -22,6 +26,12 @@
     top: initial;
     left: 0;
     width: 100%;
+    height: calc(100% - 4.5em);
+}
+
+.mobile.sb-left #toolbar, .mobile.sb-right #toolbar {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .mobile #map {
@@ -168,22 +178,42 @@ button:focus {
     }
 }*/
 
-.mobile .input-group, .mobile #search_address {
+.mobile .input-group, .mobile .search_address {
     display: table;
-    position: relative;
-    height: 3em;
+    /*position: relative;*/
     width: 100%;
+}
+
+.mobile .search_address input {
+    height: 3em;
+}
+
+.mobile .input-group {
+    height: 100%;
+}
+
+.mobile #toolbar .input-group.search_address {
+    height: 3em;
+    bottom: 0;
 }
 
 .mobile #toolbar .input-group-btn {
     display: none;
 }
 
-.mobile #searchresults {
+.mobile #toolbar div {
     position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.mobile #toolbar div#searchresults {
     bottom: 3em;
     top: initial;
     width: 100%;
+    height: initial;
+    max-height: calc(100% - 3em);
+    overflow-y: auto;
 }
 
 .mobile.sb-right .panelspace-opened:not(.panelspace) {
@@ -208,6 +238,7 @@ button:focus {
 
 .mobile .panelspace {
     width: 0% !important;
+    transition: width 0.5s;
 }
 
 .mobile .panelspace-wrapper {
