@@ -27,6 +27,7 @@
     left: 0;
     width: 100%;
     height: calc(100% - 4.5em);
+    pointer-events: none;
 }
 
 .mobile.sb-left #toolbar, .mobile.sb-right #toolbar {
@@ -193,6 +194,7 @@ button:focus {
 }
 
 .mobile #toolbar .input-group.search_address {
+    pointer-events: all;
     height: 3em;
     bottom: 0;
 }
@@ -205,6 +207,7 @@ button:focus {
     position: absolute;
     height: 100%;
     width: 100%;
+    pointer-events: none;
 }
 
 .mobile #toolbar div#searchresults {
@@ -214,6 +217,7 @@ button:focus {
     height: initial;
     max-height: calc(100% - 3em);
     overflow-y: auto;
+    pointer-events: all;
 }
 
 .mobile.sb-right .panelspace-opened:not(.panelspace) {
