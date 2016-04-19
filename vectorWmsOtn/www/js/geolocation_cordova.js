@@ -10,7 +10,7 @@ define(['angular', 'ol'],
                 return {
                     templateUrl: hsl_path + 'components/geolocation/partials/geolocation_cordova.html',
                     link: function link(scope, element, attrs) {
-                        element.appendTo($(".ol-overlaycontainer-stopevent"));
+                        element.appendTo($("#menu"));
                         $('.blocate').click(function() {
                             $('.locate-mobile').toggleClass('ol-collapsed');
                             Geolocation.toggleGps();

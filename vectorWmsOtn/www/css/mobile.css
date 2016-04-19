@@ -1,6 +1,6 @@
-* {
+/** {
     transition: transform 0.5s;
-}
+}*/
 
 .mobile button {
     outline: none !important;
@@ -37,6 +37,7 @@
 
 .mobile #map {
     width: 100% !important;
+    height: calc(100% - 4.5em) !important;
 }
 
 .ol-zoom {
@@ -59,7 +60,8 @@
 }
 
 .ol-control.ol-attribution {
-    background-color: #ddd;
+    /*background-color: #ddd;*/
+    bottom: 2.5em;
 }
 
 .ol-control button {
@@ -103,7 +105,7 @@ button:focus {
     color: #666;
 }
 
-.mobile#menu .btn {
+.mobile#menu .toolbar-buttons .btn {
     border: none;
     border-radius: 0px;
     vertical-align: bottom;
@@ -119,7 +121,7 @@ button:focus {
     display: none;
 }
 
-.mobile#menu .btn-mobile, .mobile#menu .btn-mobile-only, .mobile#menu .menu-item {
+.mobile#menu .toolbar-buttons .btn-mobile, .mobile#menu .toolbar-buttons .btn-mobile-only, .mobile#menu .toolbar-buttons .menu-item {
     display: table-cell;
 }
 
@@ -132,23 +134,18 @@ button:focus {
 }
 
 .locate-mobile.ol-control {
-    bottom: .1em;
+    bottom: 4.6em;
     width: 12em;
     right: .1em;
-    background: rgba(255,255,255, .8);
 }
 
 .locate-mobile:not(.ol-collapsed) {
-    background: rgba(255,255,255, .8);
+    background: white;
 }
 
 .locate-mobile ul {
     list-style: none;
     float: left;
-}
-
-#map {
-    height: calc(100% - 4.5em) !important;
 }
 
 #page-wrapper, #content-wrapper, .page-content {
@@ -166,7 +163,7 @@ button:focus {
 
 .locate-mobile ul {
     padding-left: .5em;
-    margin-bottom: .25em;
+    margin: .25em 0;
 }
 
 .mobile.sb-left div#map, .mobile.sb-right div#map {
@@ -236,13 +233,12 @@ button:focus {
     display: none;
 }
 
-.mobile .panelspace-opened.panelspace {
+.mobile .panelspace {
     width: 75% !important;
 }
 
-.mobile .panelspace {
-    width: 0% !important;
-    transition: width 0.5s;
+.mobile .panelspace:not(.panelspace-opened) {
+    transform: translate(-100%, 0);
 }
 
 .mobile .panelspace-wrapper {
@@ -257,4 +253,12 @@ button:focus {
     margin-left: 0 !important;
     width: 100% !important;
     height: initial !important;
+}
+
+.mobile #map, .mobile #menu, .mobile #toolbar, .mobile .panelspace {
+    transition: transform 0.5s;
+}
+
+.mobile #map.panelspace-opened {
+    pointer-events: none;
 }

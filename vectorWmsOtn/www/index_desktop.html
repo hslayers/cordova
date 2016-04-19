@@ -29,7 +29,7 @@
                 * Enable inline JS: add 'unsafe-inline' to default-src
         <meta http-equiv="Content-Security-Policy" content="'img-src' 'self' *.tile.osm.org *.tiles.mapbox.com data:; style-src 'self' 'unsafe-inline'; media-src *; 'default-src'">
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; img-src * 'self' data:">
         <!-- <script type="text/javascript" src="js/index.js"></script> -->
         <script type="text/javascript" src="js/jquery.min.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
@@ -60,6 +60,6 @@
         </script>
         <script type="text/javascript" src="js/require.js"></script>
         <script type="text/javascript" src="js/hslayers.js"></script>
-        <link rel="stylesheet" type="text/css" href="css/mobile.css"/>
+        <link rel="stylesheet" type="text/css" href="css/mobile.css">
     </body>
 </html>

@@ -1,40 +1,39 @@
 'use strict';
 
 var hsl_path = '';
+var gitsha = $.ajax({
+    type: "GET",
+    url: hsl_path + 'gitsha.js',
+    async: false
+}).responseText;
+
 require.config({
     paths: {
+        sidebar: hsl_path + 'components/sidebar/sidebar',
         toolbar: hsl_path + 'components/toolbar/toolbar',
         mobile_toolbar: hsl_path + 'components/mobile_toolbar/mobile_toolbar',
-        bootstrap: hsl_path + 'bower_components/bootstrap/dist/js/bootstrap.min',
+        utils: hsl_path + 'components/utils.js',
         layermanager: hsl_path + 'components/layermanager/layermanager',
         ows: hsl_path + 'components/ows/ows',
         'ows.wms': hsl_path + 'components/ows/ows_wms',
+        'ows.wfs': hsl_path + 'components/ows/ows_wfs',
         'ows.nonwms': hsl_path + 'components/ows/ows_nonwms',
         'ows.wmsprioritized': hsl_path + 'components/ows/ows_wmsprioritized',
+        WfsSource: hsl_path + 'components/layers/hs.source.Wfs',
+        ol: hsl_path + 'node_modules/openlayers/dist/ol-debug',
         query: hsl_path + 'components/query/query',
         search: hsl_path + 'components/search/search',
         print: hsl_path + 'components/print/print',
         permalink: hsl_path + 'components/permalink/permalink',
-        lodexplorer: hsl_path + 'components/lodexplorer/lodexplorer',
         // geolocation: hsl_path + 'components/geolocation/geolocation',
         geolocation: 'js/geolocation_cordova',
         measure: hsl_path + 'components/measure/measure',
         legend: hsl_path + 'components/legend/legend',
         app: 'js/app',
-        panoramio: hsl_path + 'components/panoramio/panoramio',
         core: hsl_path + 'components/core/core',
-        SparqlJson: hsl_path + 'extensions/hs.source.SparqlJson',
+        datasource_selector: hsl_path + 'components/datasource_selector/datasource_selector',
         api: hsl_path + 'components/api/api',
-        translations: hsl_path + 'components/translations/js/translations',
-        'feature-crossfilter': hsl_path + 'components/feature_crossfilter/f_crossfilter'
-    },
-    shim: {
-        d3: {
-            exports: 'd3'
-        },
-        dc: {
-            deps: ['d3', 'crossfilter']
-        }
+        translations: hsl_path + 'components/translations/js/translations'
     }
 });
 
