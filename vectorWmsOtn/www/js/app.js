@@ -1,6 +1,6 @@
 'use strict';
 
-define(['angular', 'ol', 'sidebar', 'toolbar', 'layermanager', 'map', 'query', 'search', 'print', 'permalink', 'measure', 'legend', 'geolocation', 'core', 'api', 'angular-gettext', 'bootstrap', 'translations', 'compositions', 'status_creator', 'mobile_toolbar'],
+define(['angular', 'ol', 'sidebar', 'toolbar', 'layermanager', 'map', 'query', 'search', 'print', 'permalink', 'measure', 'legend', 'geolocation', 'core', 'api', 'angular-gettext', 'bootstrap', 'translations', 'compositions', 'status_creator', 'mobile_toolbar', 'ows.nonwms'],
 
     function(angular, ol, toolbar, layermanager) {
         var module = angular.module('hs', [
@@ -14,11 +14,11 @@ define(['angular', 'ol', 'sidebar', 'toolbar', 'layermanager', 'map', 'query', '
             'gettext',
             'hs.compositions', 'hs.status_creator',
             'hs.sidebar',
-            'hs.mobile_toolbar'
+            'hs.mobile_toolbar',
+            'hs.ows.nonwms'
         ]);
 
         module.directive('hs', ['hs.map.service', 'Core', function(OlMap, Core) {
-            console.log("Layout created.");
             return {
                 templateUrl: hsl_path + 'hslayers_mobile.html',
                 link: function(scope, element) {
