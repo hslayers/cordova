@@ -13,8 +13,12 @@ define(['angular', 'ol'],
                         element.appendTo($("#menu"));
                         $('.blocate').click(function() {
                             $('.locate-mobile').toggleClass('ol-collapsed');
-                            Geolocation.toggleGps();
-                            Geolocation.toggleFeatures(!$('.locate-mobile').hasClass('ol-collapsed'));
+                            // Rewrite this, ugly implementation.
+                            $('#toolbar').removeClass('show');
+                            if (!Geolocation.gpsStatus && !$('.locate-mobile').hasClass('ol-collapsed')) {
+                                Geolocation.toggleGps();
+                                Geolocation.toggleFeatures(true);
+                            }
                         });
                     },
                     replace: true
@@ -39,6 +43,7 @@ define(['angular', 'ol'],
                             }
                         },
                         gpsStatus: false,
+                        gpsSwitch: 'Start GPS',
                         changed_handler: null,
                     };
                     
@@ -55,23 +60,24 @@ define(['angular', 'ol'],
                     
                     me.toggleGps = function () {
                         if (me.gpsStatus === false) {
-                            console.log('Starting GPS.');
                             me.startGpsWatch();
                         } else if (me.gpsStatus === true) {
-                            console.log('Stopping GPS.');
                             me.stopGpsWatch();
                         }
+                        $rootScope.$broadcast('geolocation.switched');
                     }
 
                     me.startGpsWatch = function () {
                         if (navigator.geolocation) {
                             me.gpsStatus = true;
+                            // me.gpsSwitch = 'Stop GPS';
                             me.changed_handler = me.geolocation.watchPosition(gpsOkCallback, gpsFailCallback, gpsOptions);
                         }
                     };
                     
                     me.stopGpsWatch = function () {
                         me.gpsStatus = false;
+                        // me.gpsSwitch = 'Start GPS';
                         me.geolocation.clearWatch(me.changed_handler);
                         me.changed_handler = null;
                     };
@@ -157,6 +163,12 @@ define(['angular', 'ol'],
                 $scope.speed = null;
                 $scope.alt = null;
                 $scope.altitudeAccuracy = null;
+                $scope.Geolocation = service;
+
+                $scope.switchGps = function () {
+                    service.toggleGps();
+                    service.toggleFeatures(service.gpsStatus);
+                }
 
                 $scope.getGeolocationProvider = function () {
                     return service.geolocation;
@@ -192,6 +204,13 @@ define(['angular', 'ol'],
                     $scope.speed = service.speed;
                     $scope.alt = service.altitude;
                     $scope.altitudeAccuracy = service.altitudeAccuracy;
+                    if (!$scope.$$phase) {
+                        $scope.$digest();
+                    }
+                });
+
+                $scope.$on('geolocation.switched', function (event) {
+                    service.gpsSwitch = service.gpsStatus ? 'Stop GPS' : 'Start GPS';
                     if (!$scope.$$phase) {
                         $scope.$digest();
                     }

@@ -105,37 +105,6 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                     }),
                     title: 'ELF Basemap',
                     base: true
-                // }),
-                // new ol.layer.Vector({
-                //     title: "Parcels",
-                //     source: new WfsSource({
-                //         url: 'http://services.cuzk.cz/wfs/inspire-cp-wfs.asp',
-                //         typename: 'CP:CadastralParcel',
-                //         projection: 'EPSG:3857',
-                //         version: '2.0.0',
-                //         format: new ol.format.WFS(),
-                //         hsproxy: true,
-                //         parser: feature_parser
-                //     }),
-                //     style: style
-                // }),
-                // new ol.layer.Vector({
-                //     title: "Buildings",
-                //     maxResolution: 2.4,
-                //     visible: false,
-                //     source: new WfsSource({
-                //         url: 'https://security.locationframework.eu/wss/service/CZ-AD/httpauth',
-                //         typename: 'AD:Address',
-                //         projection: 'EPSG:3857',
-                //         version: '2.0.0',
-                //         format: new ol.format.WFS(),
-                //         hsproxy: true,
-                //         beforeSend: function(xhr) {
-                //             xhr.setRequestHeader("Authorization", "Basic " + btoa("WRLS" + ":" + "WRLSELFx1"));
-                //         },
-                //         parser: feature_parser
-                //     }),
-                //     style: style
                 })
             ],
             default_view: new ol.View({

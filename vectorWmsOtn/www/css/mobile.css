@@ -6,6 +6,15 @@
     outline: none !important;
 }
 
+.locate-mobile button {
+    display: inline-block;
+    min-width: 4.375em;
+}
+
+.locate-mobile button#geolocation-switch {
+    width: 5em;
+}
+
 .mobile#menu {
     display: table;
     /*left: 2px;*/
