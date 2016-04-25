@@ -36,6 +36,7 @@ define(['angular', 'ol'],
                                 OlMap.map.addLayer(me.position_layer);
                                 src.addFeature(accuracyFeature);
                                 src.addFeature(positionFeature);
+                                me.position_layer.setZIndex(99);
                             } else {
                                 src.removeFeature(accuracyFeature);
                                 src.removeFeature(positionFeature);

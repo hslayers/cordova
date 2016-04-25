@@ -83,27 +83,35 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
 
         module.value('config', {
             default_layers: [
+                // new ol.layer.Tile({
+                //     source: new ol.source.OSM(),
+                //     title: "Base layer",
+                //     base: true
+                // }),
+                // new ol.layer.Tile({
+                //     source: new ol.source.WMTS({
+                //         url: "http://opencache.statkart.no/gatekeeper/gk/gk.open_wmts",
+                //         layer: 'elf_basemap',
+                //         matrixSet: 'EPSG:3857',
+                //         format: 'image/png',
+                //         projection: ol.proj.get('EPSG:3857'),
+                //         tileGrid: new ol.tilegrid.WMTS({
+                //             origin: ol.extent.getTopLeft(projectionExtent),
+                //             resolutions: resolutions,
+                //             matrixIds: matrixIds
+                //         }),
+                //         style: 'default',
+                //         wrapX: true
+                //     }),
+                //     title: 'ELF Basemap',
+                //     base: true
+                // }),
                 new ol.layer.Tile({
-                    source: new ol.source.OSM(),
-                    title: "Base layer",
-                    base: true
-                }),
-                new ol.layer.Tile({
-                    source: new ol.source.WMTS({
-                        url: "http://opencache.statkart.no/gatekeeper/gk/gk.open_wmts",
-                        layer: 'elf_basemap',
-                        matrixSet: 'EPSG:3857',
-                        format: 'image/png',
-                        projection: ol.proj.get('EPSG:3857'),
-                        tileGrid: new ol.tilegrid.WMTS({
-                            origin: ol.extent.getTopLeft(projectionExtent),
-                            resolutions: resolutions,
-                            matrixIds: matrixIds
-                        }),
-                        style: 'default',
-                        wrapX: true
+                    source: new ol.source.XYZ({
+                        url: 'http://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+                        tilePixelRatio: 2
                     }),
-                    title: 'ELF Basemap',
+                    title: "Base layer",
                     base: true
                 })
             ],
