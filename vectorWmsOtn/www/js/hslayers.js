@@ -12,6 +12,7 @@ require.config({
         sidebar: hsl_path + 'components/sidebar/sidebar',
         toolbar: hsl_path + 'components/toolbar/toolbar',
         mobile_toolbar: hsl_path + 'components/mobile_toolbar/mobile_toolbar',
+        mobile_settings: hsl_path + 'components/mobile_settings/mobile_settings',
         utils: hsl_path + 'components/utils.js',
         layermanager: hsl_path + 'components/layermanager/layermanager',
         ows: hsl_path + 'components/ows/ows',

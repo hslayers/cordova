@@ -39,19 +39,27 @@
             
             function onDeviceReady() {
                 console.log('Device ready.');
-                db = window.openDatabase("tracking", "0.1", "Geolocation log", 200000);
+                settingsDb = window.sqlitePlugin.openDatabase({name: 'settings.db', location: 'default'});
+                trackingDb = window.sqlitePlugin.openDatabase({name: 'tracking.db', location: 'default'});
+
                 db_id = 0;
-                db.transaction(createLog, errorCB, successCB);
+                trackingDb.transaction(createLog, errorCB, successCB);
 
                 document.addEventListener("backbutton", function(e){
-                    navigator.app.exitApp();
-                //    if($.mobile.activePage.is('#homepage')){
-                //        e.preventDefault();
-                //        navigator.app.exitApp();
-                //    }
-                //    else {
-                //        navigator.app.backHistory()
-                //    }
+                    if ($(".panelspace-opened")[0]) {
+                        togglePanelspace();
+                    } else if ($("#toolbar.show")[0]) {
+                        $('#toolbar').toggleClass('show');
+                    } else if (!$(".locate-mobile.ol-collapsed")[0]) {
+                        $('.locate-mobile').toggleClass('ol-collapsed');
+                    } else {
+                        settingsDb.close(function () {
+                            console.log("DB successfully closed.");
+                            navigator.app.exitApp();
+                        }, function (error) {
+                            console.log(error);
+                        });
+                    }
                 }, false);
             }
         </script>

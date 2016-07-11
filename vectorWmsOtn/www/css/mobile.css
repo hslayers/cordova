@@ -122,7 +122,7 @@ button:focus {
     padding: 0px;
     font-size: 1.5em;
     height: 3em;
-    width: 25%;
+    width: 20%;
     display: none;
 }
 
@@ -168,6 +168,10 @@ button:focus {
 .mobile#menu span, .mobile#menu i {
     width: 1em;
     height: 1em;
+}
+
+.mobile .glyphicon {
+    top: 0.175em;
 }
 
 .locate-mobile ul {
@@ -227,34 +231,35 @@ button:focus {
 }
 
 .mobile.sb-right .panelspace-opened:not(.panelspace) {
-    transform: translate(-75%, 0);
+    transform: translate(-80%, 0);
 }
 
 .mobile.sb-left .panelspace-opened:not(.panelspace) {
-    transform: translate(75%, 0);
+    transform: translate(80%, 0);
 }
 
-.mobile #menu.panelspace-opened button:not(.menu-switch) {
+/*.mobile #menu.panelspace-opened button:not(.menu-switch) {
     display: none;
 }
 
 .mobile #menu:not(.panelspace-opened) button.menu-switch {
     display: none;
-}
+}*/
 
 .mobile .panelspace {
-    width: 75% !important;
+    width: 80% !important;
 }
 
 .mobile .panelspace:not(.panelspace-opened) {
     transform: translate(-100%, 0);
+    box-shadow: none;
 }
 
-.mobile .panelspace-wrapper {
+.mobile .panelspace-wrapper, .mobile #sidebar {
     width: 100% !important;
 }
 
-.mobile #sidebar, .mobile .mid-pane, .mobile button.close {
+.mobile .mid-pane, a.sidebar-main {
     display: none;
 }
 
@@ -264,8 +269,59 @@ button:focus {
     height: initial !important;
 }
 
+.mobile.panelspace:not(.labels) #sidebar {
+    display: none;
+}
+
 .mobile #map, .mobile #menu, .mobile #toolbar, .mobile .panelspace {
     transition: transform 0.5s;
+}
+
+.mobile .list-group.hostnames {
+    margin-bottom: 0;
+}
+
+.mobile .list-group.hostnames .list-group-item, #hs-settings-hostname .form-control {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    margin-bottom: initial;
+}
+
+.mobile form#hs-settings-hostname {
+    position: relative;
+    height: 34px;
+}
+
+.mobile form#hs-settings-hostname input {
+    position: absolute;
+}
+
+.mobile form#hs-settings-hostname input.form-submit {
+    top: 50%;
+    transform: translateY(-50%);
+    right: .25em;
+}
+
+.mobile .hs-settings-hostname-title {
+    font-weight: bold;
+}
+
+.mobile .list-group.hostnames .list-group-item {
+    position: relative;
+}
+
+.mobile .list-group.hostnames .list-group-item .menu-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 1em;
+}
+
+.mobile .list-group.hostnames .list-group-item:not(.editable) .menu-icon {
+    pointer-events: none;
+    color: #bbb;
 }
 
 .mobile #map.panelspace-opened {

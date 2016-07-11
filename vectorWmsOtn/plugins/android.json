@@ -15,6 +15,9 @@
         },
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.sdi4apps.vectorwmsotn"
+        },
+        "cordova-sqlite-storage": {
+            "PACKAGE_NAME": "com.sdi4apps.vectorwmsotn"
         }
     },
     "dependent_plugins": {}

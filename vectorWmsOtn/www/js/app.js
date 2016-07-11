@@ -1,6 +1,6 @@
 'use strict';
 
-define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map', 'ows', 'query', 'search', 'permalink', 'measure', 'legend', 'bootstrap', 'geolocation', 'core', 'datasource_selector', 'api', 'angular-gettext', 'translations', 'compositions', 'status_creator', 'mobile_toolbar', 'ows.nonwms', 'print'],
+define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map', 'ows', 'query', 'search', 'permalink', 'measure', 'legend', 'bootstrap', 'geolocation', 'core', 'datasource_selector', 'api', 'angular-gettext', 'translations', 'compositions', 'status_creator', 'mobile_toolbar', 'mobile_settings', 'ows.nonwms', 'print'],
 
     function(angular, ol, toolbar, layermanager, WfsSource) {
         var module = angular.module('hs', [
@@ -19,6 +19,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
             'hs.compositions', 'hs.status_creator',
             'hs.sidebar',
             'hs.mobile_toolbar',
+            'hs.mobile_settings',
             'hs.ows.nonwms'
         ]);
 
@@ -120,8 +121,36 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                 zoom: 4,
                 units: "m"
             }),
-            compositions_catalogue_url: 'http://www.whatstheplan.eu/php/metadata/csw/',
-            status_manager_url: 'http://www.whatstheplan.eu/wwwlibs/statusmanager/index.php',
+            hostname: {
+                "default": {
+                    "title": "Default",
+                    "type": "default",
+                    "editable": false,
+                    "url": 'http://youth.sdi4apps.eu'
+                },
+                "compositions_catalogue": {
+                    "title": "Compositions catalogue",
+                    "type": "compositions_catalogue",
+                    "editable": true,
+                    "url": 'http://www.whatstheplan.eu'
+                },
+                "status_manager": {
+                    "title": "Status manager",
+                    "type": "status_manager",
+                    "editable": true,
+                    "url": 'http://www.whatstheplan.eu'
+                },
+            },
+            /*hostname: {
+                default: 'http://youth.sdi4apps.eu',
+                compositions_catalogue: 'http://www.whatstheplan.eu',
+                status_manager: 'http://www.whatstheplan.eu'
+            },*/
+            // compositions_catalogue_url: '/p4b-dev/cat/catalogue/libs/cswclient/cswClientRun.php',
+            status_manager_url: '/wwwlibs/statusmanager/index.php',
+            compositions_catalogue_url: '/php/metadata/csw/',
+            // compositions_catalogue_url: 'http://www.whatstheplan.eu/php/metadata/csw/',
+            // status_manager_url: 'http://www.whatstheplan.eu/wwwlibs/statusmanager/index.php',
             connectTypes: ["", "WMS", "WFS", "KML", "GeoJSON"],
             datasources: [{
                 title: "Catalogue",

@@ -107,8 +107,8 @@ define(['angular', 'ol'],
                         
                         lat = position.coords.latitude;
                         lon = position.coords.longitude;
-                        db.transaction(logPosition, errorCB, successCB);
-                        db_id += 1;
+                        trackingDb.transaction(logPosition, errorCB, successCB);
+                        db_id++;
                         
                         $rootScope.$broadcast('geolocation.updated');
                     };
