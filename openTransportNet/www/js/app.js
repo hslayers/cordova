@@ -16,11 +16,10 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
             'hs.api',
             'hs.ows',
             'gettext',
-            'hs.compositions', 'hs.status_creator',
+            'hs.compositions',
             'hs.sidebar',
             'hs.mobile_toolbar',
             'hs.mobile_settings',
-            'hs.ows.nonwms'
         ]);
 
         module.directive('hs', ['hs.map.service', 'Core', function(OlMap, Core) {
@@ -28,11 +27,118 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                 templateUrl: hsl_path + 'hslayers_mobile.html',
                 link: function(scope, element) {
                     Core.fullScreenMap(element);
+                    var $otn = $('<a>');
+                    $otn.html('OTN')
+                        .attr('href', 'http://opentnet.eu/')
+                        .attr('target', '_blank')
+                        .addClass('btn btn-default')
+                        .css({
+                            'z-index': 1000,
+                            'position': 'absolute',
+                            'top': '5px',
+                            'right': '5px'
+                        });
+                    element.append($otn);
                 }
             };
         }]);
 
-        var style = new ol.style.Style({
+        module.value('config', {
+            box_layers: [
+                new ol.layer.Group({
+                    'img': 'img/osm.png',
+                    title: 'Base layer',
+                    layers: [
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'http://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
+                                tilePixelRatio: 2
+                            }),
+                            title: "Base layer",
+                            base: true
+                        }),
+                        new ol.layer.Tile({
+                            title: "OpenCycleMap",
+                            visible: false,
+                            base: true,
+                            source: new ol.source.OSM({
+                                url: 'http://{a-c}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png'
+                            })
+                        }),
+                        new ol.layer.Tile({
+                            title: "Satellite",
+                            visible: false,
+                            base: true,
+                            source: new ol.source.XYZ({
+                                url: 'http://api.tiles.mapbox.com/v4/mapbox.streets-satellite/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicmFpdGlzYmUiLCJhIjoiY2lrNzRtbGZnMDA2bXZya3Nsb2Z4ZGZ2MiJ9.g1T5zK-bukSbJsOypONL9g'
+                            })
+                        })
+                    ],
+                })/*, new ol.layer.Group({
+                    'img': 'img/armenia.png',
+                    title: 'WMS layers',
+                    layers: [
+                        new ol.layer.Tile({
+                            title: "Swiss",
+                            source: new ol.source.TileWMS({
+                                url: 'http://wms.geo.admin.ch/',
+                                params: {
+                                    LAYERS: 'ch.swisstopo.pixelkarte-farbe-pk1000.noscale',
+                                    INFO_FORMAT: undefined,
+                                    FORMAT: "image/png; mode=8bit"
+                                },
+                                crossOrigin: 'anonymous'
+
+                            }),
+                        })
+                    ]
+                })*/
+            ],
+            default_view: new ol.View({
+                center: ol.proj.transform([17.474129, 52.574000], 'EPSG:4326', 'EPSG:3857'), //Latitude longitude    to Spherical Mercator
+                zoom: 4,
+                units: "m"
+            }),
+            connectTypes: ['', 'WMS', 'WMTS', 'GeoJSON', 'KML'],
+            dsPaging: 30,
+            hostname: {
+                "default": {
+                    "title": "Default",
+                    "type": "default",
+                    "editable": false,
+                    "url": 'http://opentransportnet.eu'
+                }
+            },
+            permalinkUrlPrefix: 'http://opentransportnet.eu/create-maps',
+            compositions_catalogue_url: '/php/metadata/csw/',
+            status_manager_url: '/wwwlibs/statusmanager2/index.php',
+            datasources: [{
+                title: "Hub layers",
+                url: "http://opentransportnet.eu/php/metadata/csw/",
+                language: 'eng',
+                type: "micka",
+                code_list_url: 'http://opentransportnet.eu/php/metadata/util/codelists.php?_dc=1440156028103&language=eng&page=1&start=0&limit=25&filter=%5B%7B%22property%22%3A%22label%22%7D%5D'
+            }]
+        });
+
+        module.controller('Main', ['$scope', 'Core', 'hs.query.service_infopanel', 'hs.compositions.service_parser', 'config',
+            function($scope, Core, InfoPanelService, composition_parser, config) {
+                if (console) console.log("Main called");
+                $scope.hsl_path = hsl_path; //Get this from hslayers.js file
+                $scope.Core = Core;
+                Core.sidebarRight = false;
+                Core.singleDatasources = true;
+                $scope.$on('infopanel.updated', function(event) {
+                    if (console) console.log('Attributes', InfoPanelService.attributes, 'Groups', InfoPanelService.groups);
+                });
+            }
+        ]);
+
+        return module;
+    });
+
+
+/*        var style = new ol.style.Style({
             image: new ol.style.Circle({
                 fill: new ol.style.Fill({
                     color: [242, 121, 0, 0.7]
@@ -142,11 +248,11 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                 },
             },
             permalinkUrlPrefix: 'http://opentransportnet.eu/create-maps',
-            /*hostname: {
-                default: 'http://youth.sdi4apps.eu',
-                compositions_catalogue: 'http://www.whatstheplan.eu',
-                status_manager: 'http://www.whatstheplan.eu'
-            },*/
+            // hostname: {
+            //     default: 'http://youth.sdi4apps.eu',
+            //     compositions_catalogue: 'http://www.whatstheplan.eu',
+            //     status_manager: 'http://www.whatstheplan.eu'
+            // },
             // compositions_catalogue_url: '/p4b-dev/cat/catalogue/libs/cswclient/cswClientRun.php',
             status_manager_url: '/wwwlibs/statusmanager/index.php',
             compositions_catalogue_url: '/php/metadata/csw/',
@@ -184,4 +290,4 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
         ]);
 
         return module;
-    });
+    });*/
