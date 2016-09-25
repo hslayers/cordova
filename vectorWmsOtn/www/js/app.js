@@ -127,21 +127,26 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                     "type": "default",
                     "editable": false,
                     "url": 'http://youth.sdi4apps.eu'
-                },
-                "compositions_catalogue": {
-                    "title": "Compositions catalogue",
-                    "type": "compositions_catalogue",
-                    "editable": true,
-                    "url": 'http://www.whatstheplan.eu'
-                },
-                "status_manager": {
-                    "title": "Status manager",
-                    "type": "status_manager",
-                    "editable": true,
-                    "url": 'http://www.whatstheplan.eu'
-                },
+                }//,
+                // "compositions_catalogue": {
+                //     "title": "Compositions catalogue",
+                //     "type": "compositions_catalogue",
+                //     "editable": true,
+                //     "url": 'http://www.whatstheplan.eu'
+                // },
+                // "status_manager": {
+                //     "title": "Status manager",
+                //     "type": "status_manager",
+                //     "editable": true,
+                //     "url": 'http://www.whatstheplan.eu'
+                // },
             },
-            permalinkUrlPrefix: 'http://opentransportnet.eu/create-maps',
+            permalinkLocation: {
+                'host': 'youth.sdi4apps.eu',
+                'pathname': '/1',
+                'origin': 'http://youth.sdi4apps.eu',
+                'hsl_path': '/wwwlibs/hslayers-ng/'
+            },
             /*hostname: {
                 default: 'http://youth.sdi4apps.eu',
                 compositions_catalogue: 'http://www.whatstheplan.eu',

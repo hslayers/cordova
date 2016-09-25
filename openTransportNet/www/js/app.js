@@ -54,16 +54,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                                 url: 'http://{a-c}.osm.rrze.fau.de/osmhd/{z}/{x}/{y}.png',
                                 tilePixelRatio: 2
                             }),
-                            title: "Base layer",
+                            title: "Topographic",
                             base: true
-                        }),
-                        new ol.layer.Tile({
-                            title: "OpenCycleMap",
-                            visible: false,
-                            base: true,
-                            source: new ol.source.OSM({
-                                url: 'http://{a-c}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png'
-                            })
                         }),
                         new ol.layer.Tile({
                             title: "Satellite",
@@ -109,7 +101,12 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                     "url": 'http://opentransportnet.eu'
                 }
             },
-            permalinkUrlPrefix: 'http://opentransportnet.eu/create-maps',
+            permalinkLocation: {
+                'host': 'opentransportnet.eu',
+                'pathname': '/create-maps',
+                'origin': 'http://opentransportnet.eu',
+                'hsl_path': '/wwwlibs/hslayers-ng/'
+            },
             compositions_catalogue_url: '/php/metadata/csw/',
             status_manager_url: '/wwwlibs/statusmanager2/index.php',
             datasources: [{
@@ -128,6 +125,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                 $scope.Core = Core;
                 Core.sidebarRight = false;
                 Core.singleDatasources = true;
+                // Core.panelEnabled('mobile_settings', false);
+                Core.panelEnabled('status_creator', false);
                 $scope.$on('infopanel.updated', function(event) {
                     if (console) console.log('Attributes', InfoPanelService.attributes, 'Groups', InfoPanelService.groups);
                 });

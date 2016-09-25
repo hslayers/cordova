@@ -49,7 +49,7 @@ define(['angular', 'ol'],
                     };
                     
                     me.set_center = function () {
-                        OlMap.map.getView().setCenter(me.last_location);
+                        OlMap.map.getView().setCenter(me.last_location.latlng);
                     };
 
                     var accuracyFeature = new ol.Feature();
@@ -88,17 +88,21 @@ define(['angular', 'ol'],
                         me.altitude = position.coords.altitude ? Math.round(position.coords.altitude) : '-';
                         me.heading = position.coords.heading ? position.coords.heading : null;
                         me.speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : '-';
-                        me.last_location = ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', OlMap.map.getView().getProjection());
+                        me.last_location = {
+                            "latlng": ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', OlMap.map.getView().getProjection()),
+                            "geoposition": position
+                        }
+                        // me.last_location.latlng = ol.proj.transform([position.coords.longitude, position.coords.latitude], 'EPSG:4326', OlMap.map.getView().getProjection());
                         if (!positionFeature.setGeometry()) {
-                            positionFeature.setGeometry(new ol.geom.Point(me.last_location));
+                            positionFeature.setGeometry(new ol.geom.Point(me.last_location.latlng));
                         } else {
-                            positionFeature.getGeometry().setCoordinates(me.last_location);
+                            positionFeature.getGeometry().setCoordinates(me.last_location.latlng);
                         }
                         
                         if (!accuracyFeature.setGeometry()) {
-                            accuracyFeature.setGeometry(new ol.geom.Circle(me.last_location, position.coords.accuracy));
+                            accuracyFeature.setGeometry(new ol.geom.Circle(me.last_location.latlng, position.coords.accuracy));
                         } else {
-                           accuracyFeature.getGeometry().setCenterAndRadius(me.last_location, me.accuracy);
+                           accuracyFeature.getGeometry().setCenterAndRadius(me.last_location.latlng, me.accuracy);
                         }
 
                         if (me.following) {
@@ -191,9 +195,6 @@ define(['angular', 'ol'],
                         console.log('Success!');
                     } else {
                         service.following = set_to;
-                        if (service.following === true) {
-                            service.set_center();
-                        }
                     }
                 };
 

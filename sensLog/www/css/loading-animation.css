@@ -1,0 +1,14 @@
+@keyframes spin {
+  0%   {
+    transform: rotate(0deg);
+    transform-origin: 53.9% 53.2%;
+    }
+  100%   {
+    transform: rotate(360deg);
+    transform-origin: 53.9% 53.2%;
+    }
+}
+
+#otn-logo #horizontal-nodes {
+  animation: spin 2s linear infinite;
+}
