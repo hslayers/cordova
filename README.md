@@ -2,8 +2,8 @@
 
 Apache Cordova is a framework used to develop mobile applications using HTML, CSS and JavaScript. Applications built using Cordova and HSLayers-NG deliver the desktop HSL experience to the mobile platform.
 
-Check out the example to get an idea:  
-https://play.google.com/store/apps/details?id=com.sdi4apps.thematicmaps
+Check out the example to get the idea:  
+[https://play.google.com/store/apps/details?id=com.sdi4apps.thematicmaps](https://play.google.com/store/apps/details?id=com.sdi4apps.thematicmaps)
 
 ## Getting Started
 
@@ -58,18 +58,17 @@ git pull origin master
 ```
 
 Create following symbolic links in your `thematicMaps/www/` directory:
+
 * `hslayers-ng/components`
-* `hslayers-ng/hslayers.html`
 * `hslayers-ng/css/font`
 * `hslayers-ng/css/whhg-font`
 * `hslayers-ng/css/app.css`
 
 ```
-ln -s ../../../hslayers-ng/components .
-ln -s ../../../hslayers-ng/hslayers.html .
-ln -s ../../../hslayers-ng/css/font .
-ln -s ../../../hslayers-ng/css/whhg-font .
-ln -s ../../../hslayers-ng/css/app.css .
+ln -s <hslayers-ng location>/components components
+ln -s <hslayers-ng location>/css/font css/font
+ln -s <hslayers-ng location>/css/whhg-font css/whhg-font
+ln -s <hslayers-ng location>/css/app.css css/app.css
 ```
 
 ### Configure your Cordova app
@@ -83,12 +82,19 @@ cp thematicMaps myApp
 Remove the files and create symbolic links that should be based on the master example:
 
 ```
-cd myApp/www/js
-rm geolocation_cordova.js geolocation_logging.js hslayers.js
-ln -s ../../../thematicMaps/www/js/geolocation_cordova.js .
-ln -s ../../../thematicMaps/www/js/geolocation_logging.js .
-ln -s ../../../thematicMaps/www/js/hslayers.js .
+rm myApp/www/js/hslayers.js myApp/www/css/mobile.css myApp/www/bower_components myApp/www/node_modules
+ln -s thematicMaps/www/js/hslayers.js myApp/www/js/hslayers.js
+ln -s thematicMaps/www/css/mobile.css myApp/www/css/mobile.css
+ln -s thematicMaps/www/bower_components myApp/www/bower_components
+ln -s thematicMaps/www/node_modules myApp/www/node_modules
 ```
+
+After that you just need to add your target platform (only Android supported at the moment) with:
+
+```
+cordova platform add <platform>
+```
+which will also check for any plugins necessary for running the application and download them to your project.
 
 Then update your info in the `config.xml` file, optionally update your icons in the `res` folder and you are ready for your first build!
 

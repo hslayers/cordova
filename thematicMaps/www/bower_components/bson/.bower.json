@@ -1,0 +1,35 @@
+{
+  "name": "bson",
+  "description": "A bson parser for node.js and the browser",
+  "keywords": [
+    "mongodb",
+    "bson",
+    "parser"
+  ],
+  "author": "Christian Amor Kvalheim <christkv@gmail.com>",
+  "main": "./browser_build/bson.js",
+  "license": "Apache-2.0",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "alternate_parsers",
+    "benchmarks",
+    "bower_components",
+    "node_modules",
+    "test",
+    "tools"
+  ],
+  "homepage": "https://github.com/mongodb/js-bson",
+  "_release": "aa0b54597a",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "aa0b54597a0af28cce3530d2144af708e4b66bf0"
+  },
+  "_source": "https://github.com/mongodb/js-bson.git",
+  "_target": "*",
+  "_originalSource": "bson"
+}
