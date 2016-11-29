@@ -6,7 +6,6 @@ sdi4apps.keystore
 
 */platforms
 */plugins
-*/hooks
 *.sublime-project
 *.sublime-workspace
 */temporary
