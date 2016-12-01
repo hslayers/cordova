@@ -82,11 +82,12 @@ cp thematicMaps myApp
 Remove the files and create symbolic links that should be based on the master example:
 
 ```
-rm myApp/www/js/hslayers.js myApp/www/css/mobile.css myApp/www/bower_components myApp/www/node_modules
+rm myApp/www/js/hslayers.js myApp/www/css/mobile.css myApp/www/bower_components myApp/www/node_modules myApp/hooks
 ln -s thematicMaps/www/js/hslayers.js myApp/www/js/hslayers.js
 ln -s thematicMaps/www/css/mobile.css myApp/www/css/mobile.css
 ln -s thematicMaps/www/bower_components myApp/www/bower_components
 ln -s thematicMaps/www/node_modules myApp/www/node_modules
+ln -s thematicMaps/hooks myApp/hooks
 ```
 
 After that you just need to add your target platform (only Android supported at the moment) with:

@@ -40,4 +40,5 @@
     <plugin name="cordova-plugin-x-toast" spec="~2.5.2" />
     <plugin name="cordova-plugin-camera" spec="~2.3.0" />
     <plugin name="cordova-plugin-file" spec="~4.3.0" />
+    <hook src="hooks/beforeBuild.js" type="after_prepare" />
 </widget>

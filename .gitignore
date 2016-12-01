@@ -4,6 +4,7 @@ geolocationDemo
 showcase-app
 sdi4apps.keystore
 
+*/hooks
 */platforms
 */plugins
 *.sublime-project
@@ -22,6 +23,7 @@ app.css
 mobile.css
 build.json
 
+!thematicMaps/hooks
 !thematicMaps/www/node_modules
 !thematicMaps/www/bower_components
 !thematicMaps/www/css/mobile.css

@@ -41,4 +41,5 @@
     <plugin name="cordova-sqlite-storage" spec="~1.4.5" />
     <plugin name="cordova-plugin-device" spec="~1.1.2" />
     <plugin name="cordova-plugin-file" spec="~4.2.0" />
+    <hook src="hooks/beforeBuild.js" type="after_prepare" />
 </widget>
