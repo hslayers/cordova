@@ -115,7 +115,7 @@ define(['ol',
                         }
                         event.targetScope.addSenslogDataset = function() {
                             $http({
-                                    url: config.senslog_url + '/dataset/insert?user_name=tester',
+                                    url: config.senslog_url + '/dataset/?user_name=tester',
                                     method: 'POST',
                                     data: {
                                         dataset_name: event.targetScope.dataset_name,
