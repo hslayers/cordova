@@ -1,6 +1,6 @@
 'use strict';
 
-define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'map', 'ows', 'query', 'search', 'permalink', 'measure', 'legend', 'bootstrap', 'geolocation', 'core', 'api', 'angular-gettext', 'translations', 'compositions', 'mobile_toolbar', 'ows.nonwms', 'print', 'trip_planner'],
+define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'map', 'ows', 'query', 'search', 'permalink', 'measure', 'legend', 'bootstrap', 'geolocation', 'core', 'api', 'angular-gettext', 'translations', 'compositions', 'mobile_toolbar', 'ows.nonwms', 'print', 'trip_planner', 'spoi_editor'],
 
     function(angular, ol, toolbar, layermanager, SparqlJson) {
         var module = angular.module('hs', [
@@ -17,7 +17,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
             'hs.sidebar',
             'hs.mobile_toolbar',
             'hs.ows.nonwms',
-            'hs.trip_planner'
+            'hs.trip_planner',
+            'spoi_editor'
         ]);
 
         module.directive('hs', ['hs.map.service', 'Core', function(OlMap, Core) {
@@ -173,16 +174,160 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
             infopanel_template: hsl_path + 'infopanel.html'
         });
 
-        module.controller('Main', ['$scope', '$compile', '$filter', 'Core', 'hs.map.service', 'hs.query.service_infopanel', '$sce', '$http', 'config', 'hs.trip_planner.service', 'hs.permalink.service_url', 'hs.utils.service',
-            function($scope, $compile, $filter, Core, OlMap, InfoPanelService, $sce, $http, config, trip_planner_service, permalink, utils) {
+        module.controller('Main', ['$scope', '$compile', '$filter', 'Core', 'hs.map.service', '$sce', '$http', 'config', 'hs.trip_planner.service', 'hs.permalink.service_url', 'hs.utils.service', 'spoi_editor',
+            function($scope, $compile, $filter, Core, OlMap, $sce, $http, config, trip_planner_service, permalink, utils, spoi_editor) {
                 if (console) console.log("Main called");
                 $scope.hsl_path = hsl_path; //Get this from hslayers.js file
                 $scope.Core = Core;
-                Core.embededEnabled = false;
+
                 Core.panelEnabled('compositions', false);
                 Core.panelEnabled('ows', false);
-                Core.panelEnabled('status_creator', false);
+
+
+                $scope.$on("scope_loaded", function(event, args) {
+                    if (args == 'Sidebar') {
+                        var el = angular.element('<div hs.trip_planner.directive hs.draggable ng-controller="hs.trip_planner.controller" ng-if="Core.exists(\'hs.trip_planner.controller\')" ng-show="Core.panelVisible(\'trip_planner\', this)"></div>');
+                        angular.element('#panelplace').append(el);
+                        $compile(el)($scope);
+
+                        var toolbar_button = angular.element('<div hs.trip_planner.toolbar_button_directive></div>');
+                        angular.element('.sidebar-list').append(toolbar_button);
+                        $compile(toolbar_button)(event.targetScope);
+                    }
+                    if (args == 'Map') {
+                        if (permalink.getParamValue('hs_x') != null) {
+                            config.default_view.setCenter([permalink.getParamValue('hs_x'), permalink.getParamValue('hs_y')]);
+                            config.default_view.setZoom([permalink.getParamValue('hs_z')]);
+                        }
+                    }
+                })
+
+                $scope.$on('infopanel.updated', function(event) {});
+
+                var pop_div = document.createElement('div');
+                document.getElementsByTagName('body')[0].appendChild(pop_div);
+                var popup = new ol.Overlay({
+                    element: pop_div
+                });
+                OlMap.map.addOverlay(popup);
+
+                var show_location_weather = true;
+                $scope.$on('map_clicked', function(event, data) {
+                    if (!show_location_weather) return;
+                    var on_features = false;
+                    angular.forEach(data.frameState.skippedFeatureUids, function(k) {
+                        on_features = true;
+                    });
+                    if (on_features) return;
+                    var coordinate = data.coordinate;
+                    var lon_lat = ol.proj.transform(
+                        coordinate, 'EPSG:3857', 'EPSG:4326');
+                    var url = '';
+                    if (typeof use_proxy === 'undefined' || use_proxy === true) {
+                        url = "/cgi-bin/hsproxy.cgi?toEncoding=utf-8&url=" + window.escape("http://api.openweathermap.org/data/2.5/weather?APPID=13b627424cd072290defed4216e92baa&lat=" + lon_lat[1] + "&lon=" + lon_lat[0]);
+                    } else {
+                        url = "http://api.openweathermap.org/data/2.5/weather?APPID=13b627424cd072290defed4216e92baa&lat=" + lon_lat[1] + "&lon=" + lon_lat[0];
+                    }
+
+                    $.ajax({
+                            url: url
+                        })
+                        .done(function(response) {
+                            if (console) console.log(response);
+                            var element = popup.getElement();
+
+                            var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+                                coordinate, 'EPSG:3857', 'EPSG:4326'));
+                            angular.element(element).popover('destroy');
+                            var to_trip_button = '<button class="hs-spoi-point-to-trip btn btn-default">Add to trip</button>';
+                            var new_point_button = '<div class="btn-group"><button type="button" class="hs-spoi-new-poi btn btn-default dropdown-toggle" data-toggle="dropdown">Add to map  <span class="caret"></span></button><ul id="hs-spoi-new-layer-list" class="dropdown-menu"><li><a href="#">Action</a></li></ul></div>';
+                            var content = 'No weather info<br/>' + to_trip_button + new_point_button;
+                            if (response.weather) {
+                                var wind_row = 'Wind: {0}m/s {1}'.format(response.wind.speed, (response.wind.gust ? ' Gust: {0}m/s'.format(response.wind.gust) : ''));
+                                var close_button = '<button type="button" class="close"><span aria-hidden="true">×</span><span class="sr-only" translate>Close</span></button>';
+                                var weather = response.weather[0];
+                                var cloud = '<img src="http://openweathermap.org/img/w/{0}.png" alt="{1}"/>{2}'.format(weather.icon, weather.description, weather.description);
+                                var temp_row = 'Temperature: ' + (response.main.temp - 273.15).toFixed(1) + ' °C';
+                                var date_row = $filter('date')(new Date(response.dt * 1000), 'dd.MM.yyyy HH:mm');
+                                var country = '';
+                                if(angular.isDefined($scope.country_last_clicked)) 
+                                    country = $scope.country_last_clicked.countryName;
+                                content = '{0}<div style="width:300px"><p><b>{1}&nbsp;<span id="hs-spoi-country-placeholder">{2}</span></b><br/><small> at {3}</small></p>{4}<br/>{5}<br/>{6}<br/>{7} {8}</div>'
+                                    .format(close_button, response.name, country, date_row, cloud, temp_row, wind_row, to_trip_button, new_point_button);
+                            }
+                            angular.element(element).popover({
+                                'placement': 'top',
+                                'animation': false,
+                                'html': true,
+                                'content': content
+                            });
+
+                            popup.setPosition(coordinate);
+                            angular.element(element).popover('show');
+                            angular.element('.close', element.nextElementSibling).click(function() {
+                                angular.element(element).popover('hide');
+                                //show_location_weather = false;
+                            });
+                            createLayerSelectorForNewPoi(popup, coordinate);
+                            angular.element('.hs-spoi-point-to-trip', element.nextElementSibling).click(function() {
+                                trip_planner_service.addWaypoint(lon_lat[0], lon_lat[1]);
+                                return false;
+                            })
+
+                        });
+                    getCountryAtCoordinate(coordinate);
+                });
+
+                function getCountryAtCoordinate(coordinate){
+                    var latlng = ol.proj.transform(coordinate, OlMap.map.getView().getProjection(), 'EPSG:4326');
+                    delete $scope.country_last_clicked;
+                    $http.get('http://api.geonames.org/extendedFindNearby?lat={0}&lng={1}&username=raitis'.format(latlng[1], latlng[0]))
+                        .then(function(response) {
+                            var country_geoname = angular.element('fcl', response.data).filter(function(index) { return angular.element(this).text() === "A"; }).parent();
+                            $scope.country_last_clicked = {
+                                geonameId: country_geoname.find('geonameId').html(),
+                                countryName: country_geoname.find('countryName').html(),
+                                countryCode: country_geoname.find('countryCode').html()
+                            }; 
+                            angular.element('#hs-spoi-country-placeholder').html($scope.country_last_clicked.country);
+                        });
+                }
                 
+                function createLayerSelectorForNewPoi(popup, coordinate) {
+                    var possible_layers = [];
+                    angular.element("#hs-spoi-new-layer-list").html('');
+                    angular.forEach(config.box_layers[1].getLayers(), function(layer) {
+                        if (layer.getVisible()) {
+                            possible_layers.push(layer);
+                            var $li = $('<li><a href="#">' + layer.get('title') + '</a></li>');
+                            $li.data('layer', layer);
+
+                            function layerSelected() {
+                                var layer = $(this).data('layer');
+                                var feature = spoi_editor.addPoi(layer, coordinate, $scope.country_last_clicked);
+                                popup.setPosition(undefined);
+                                $scope.$broadcast('infopanel.feature_select', feature);
+                                return false;
+                            }
+
+                            $li.click(layerSelected);
+                            angular.element("#hs-spoi-new-layer-list").append($li);
+                        }
+                    });
+                    $(".dropdown-toggle").dropdown();
+                }
+
+                $scope.$on('feature_crossfilter_filtered', function(event, data) {
+                    var lyr = OlMap.findLayerByTitle('Specific points of interest');
+                    var src = lyr.getSource();
+                    src.clear();
+                    if (data !== '') {
+                        src.options.geom_attribute = '?geom';
+                        src.options.url = 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + data + '"). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on';
+                    } else
+                        src.options.url = '';
+                });
+
                 var hr_mappings;
                 $http({
                     method: 'GET',
@@ -190,13 +335,14 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     cache: false
                 }).then(function successCallback(response) {
                     hr_mappings = response.data;
+                    spoi_editor.init(hr_mappings);
                     angular.forEach(hr_mappings["http://www.openvoc.eu/poi#categoryWaze"], function(name, category) {
                         var new_lyr = new ol.layer.Vector({
                             title: " " + name,
                             source: new SparqlJson({
                                 geom_attribute: '?geom',
-                                url: '//data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
-                                updates_url: '//data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                updates_url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
                                 category_field: 'http://www.openvoc.eu/poi#categoryWaze',
                                 projection: 'EPSG:3857'
                                     //feature_loaded: function(feature){feature.set('hstemplate', 'hs.geosparql_directive')}
@@ -205,8 +351,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                             visible: (name == 'Culture & Entertainment' || name == 'Food and Drink'),
                             path: 'Points of interest',
                             category: category
-                            //minResolution: 1,
-                            //maxResolution: 38
+                                //minResolution: 1,
+                                //maxResolution: 38
                         });
                         config.box_layers[1].getLayers().insertAt(0, new_lyr);
                     })
@@ -215,8 +361,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                             title: " " + name,
                             source: new SparqlJson({
                                 geom_attribute: '?geom',
-                                url: '//data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryOSM> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + category + '"). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
-                                updates_url: '//data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryOSM> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + category + '"). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryOSM> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + category + '"). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                updates_url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryOSM> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + category + '"). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
                                 category_field: 'http://www.openvoc.eu/poi#categoryOSM',
                                 projection: 'EPSG:3857'
                             }),
@@ -232,117 +378,18 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     OlMap.reset();
                 })
 
-                $scope.makeHumanReadable = function(attribute) {
-                    var value = $sce.valueOf(attribute.value);
-                    var name = $sce.valueOf(attribute.name);
-                    if (angular.isUndefined(hr_mappings[name])) {
-                        if (value.indexOf('http:') == 0) {
-                            return $sce.trustAsHtml('<a href="' + value + '">' + value + '</a>');
-                        } else {
-                            return value;
-                        }
-                    }
-                    if (angular.isDefined(hr_mappings[name][value])) return hr_mappings[name][value];
-                    else return attribute.value;
-                }
-
-                $scope.getSpoiCategories = function(group) {
-                    return hr_mappings[group];
-                }
-
-                $scope.attrToEnglish = function(name) {
-                    var hr_names = {
-                        'http://xmlns.com/foaf/0.1/mbox': 'E-mail: ',
-                        'http://www.openvoc.eu/poi#fax': 'Fax: ',
-                        'http://xmlns.com/foaf/0.1/phone': 'Phone: ',
-                        'http://www.openvoc.eu/poi#address': 'Address: ',
-                        'http://www.openvoc.eu/poi#openingHours': 'Opening Hours: ',
-                        'http://www.openvoc.eu/poi#access': 'Access: ',
-                        'http://www.openvoc.eu/poi#accessibility': 'Accessibility: ',
-                        'http://www.openvoc.eu/poi#internetAccess': 'Internet Acces: ',
-                        'http://www.openvoc.eu/poi#categoryWaze': 'Category: ',
-                        'http://www.openvoc.eu/poi#categoryOSM': 'Subcategory: ',
-                        'http://xmlns.com/foaf/0.1/homepage': 'Homepage: ',
-                        'http://www.w3.org/2000/01/rdf-schema#seeAlso': 'More info: ',
-                        'http://www.w3.org/2004/02/skos/core#exactMatch': 'More info: ',
-                        'http://purl.org/dc/terms/1.1/created': 'Created: ',
-                        'http://www.opengis.net/ont/geosparql#sfWithin': 'Country: '
-                    }
-                    return hr_names[name];
-                }
-
-                $scope.startEdit = function(attribute, x) {
-                    attribute.is_editing = !(angular.isDefined(attribute.is_editing) && attribute.is_editing);
-                }
-
-                $scope.attributesHaveChanged = function(attributes) {
-                    var tmp = false;
-                    angular.forEach(attributes, function(a) {
-                        if (angular.isDefined(a.changed) && a.changed) tmp = true;
-                    })
-                    return tmp;
-                }
-
-                $scope.editDropdownVisible = function(attribute) {
-                    return attribute.is_editing && angular.isDefined($scope.getSpoiCategories(attribute.name));
-                }
-
-                $scope.editTextboxVisible = function(attribute) {
-                    return attribute.is_editing && angular.isUndefined($scope.getSpoiCategories(attribute.name));
-                }
-
-
-                $scope.saveSpoiChanges = function(attributes) {
-                    var identifier = '';
-                    var changes = [];
-                    angular.forEach(attributes, function(a) {
-                        if (angular.isDefined(a.changed) && a.changed) {
-                            changes.push({
-                                attribute: a.name,
-                                value: $sce.valueOf(a.value)
-                            });
-                            InfoPanelService.feature.set(a.name, $sce.valueOf(a.value));
-                        }
-                        if (a.name == 'http://purl.org/dc/elements/1.1/identifier') identifier = $sce.valueOf(a.value);
-                    })
-                    var lines = [];
-                    var d = new Date();
-                    var n = d.toISOString();
-                    var change_id = 'http://www.sdi4apps.eu/poi_changes/change_' + utils.generateUuid();
-                    var attribute_set_id = 'http://www.sdi4apps.eu/poi_changes/attributes_' + utils.generateUuid();
-                    lines.push('<' + change_id + '> <http://www.sdi4apps.eu/poi_changes/poi_id> <' + identifier + '>');
-                    lines.push('<' + change_id + '> <http://purl.org/dc/terms/1.1/created> "' + n + '"^^xsd:dateTime');
-                    lines.push('<' + change_id + '> <http://www.sdi4apps.eu/poi_changes/attribute_set> <' + attribute_set_id + '>');
-                    angular.forEach(changes, function(a) {
-                        lines.push('<' + attribute_set_id + '> <' + a.attribute + '> "' + a.value + '"');
-                    })
-
-                    var query = ['INSERT DATA { GRAPH <http://www.sdi4apps.eu/poi_changes.rdf> {', lines.join('.'), '}}'].join('\n');
-                    $.ajax({
-                            url: '//data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent(query) + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on'
-                        })
-                        .done(function(response) {
-                            angular.forEach(attributes, function(a) {
-                                if (angular.isDefined(a.changed) && a.changed) {
-                                    delete a.changed;
-                                }
-                            })
-                            if (!$scope.$$phase) $scope.$digest();
-                        });
-                }
+                $scope.getSpoiCategories = spoi_editor.getSpoiCategories;
+                $scope.makeHumanReadable = spoi_editor.makeHumanReadable;
+                $scope.attrToEnglish = spoi_editor.attrToEnglish;
+                $scope.startEdit = spoi_editor.startEdit;
+                $scope.attributesHaveChanged = spoi_editor.attributesHaveChanged;
+                $scope.editDropdownVisible = spoi_editor.editDropdownVisible;
+                $scope.editTextboxVisible = spoi_editor.editTextboxVisible;
+                $scope.saveSpoiChanges = spoi_editor.saveSpoiChanges;
             }
-        ]).filter('usrFrSpoiAttribs', function() {
-            return function(items) {
-                var filtered = [];
-                var frnly_attribs = ['http://www.openvoc.eu/poi#categoryWaze', 'http://www.openvoc.eu/poi#categoryOSM', 'http://www.w3.org/2000/01/rdf-schema#comment', 'http://xmlns.com/foaf/0.1/mbox', 'http://www.openvoc.eu/poi#fax', 'http://www.opengis.net/ont/geosparql#sfWithin', 'http://www.w3.org/2004/02/skos/core#exactMatch', 'http://www.w3.org/2000/01/rdf-schema#seeAlso', 'http://xmlns.com/foaf/0.1/homepage', 'http://purl.org/dc/terms/1.1/created']
-                angular.forEach(items, function(item) {
-                    if (frnly_attribs.indexOf(item.name) > -1) {
-                        filtered.push(item);
-                    }
-                });
-                return filtered;
-            };
-        });
+        ]).filter('usrFrSpoiAttribs', ['spoi_editor', function(spoi_editor) {
+            return spoi_editor.filterAttribs;
+        }]);
 
         return module;
     });
