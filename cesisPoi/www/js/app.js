@@ -174,15 +174,16 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
             infopanel_template: hsl_path + 'infopanel.html'
         });
 
-        module.controller('Main', ['$scope', '$compile', '$filter', 'Core', 'hs.map.service', '$sce', '$http', 'config', 'hs.trip_planner.service', 'hs.permalink.service_url', 'hs.utils.service', 'spoi_editor',
-            function($scope, $compile, $filter, Core, OlMap, $sce, $http, config, trip_planner_service, permalink, utils, spoi_editor) {
+        module.controller('Main', ['$scope', '$compile', '$filter', 'Core', 'hs.map.service', '$sce', '$http', 'config', 'hs.trip_planner.service', 'hs.permalink.service_url', 'hs.utils.service', 'spoi_editor', 'hs.mobile_toolbar.service', 
+            function($scope, $compile, $filter, Core, OlMap, $sce, $http, config, trip_planner_service, permalink, utils, spoi_editor, mobile_toolbar_service) {
                 if (console) console.log("Main called");
                 $scope.hsl_path = hsl_path; //Get this from hslayers.js file
                 $scope.Core = Core;
 
                 Core.panelEnabled('compositions', false);
                 Core.panelEnabled('ows', false);
-
+                Core.embededEnabled = false;
+                Core.panelEnabled('status_creator', false);
 
                 $scope.$on("scope_loaded", function(event, args) {
                     if (args == 'Sidebar') {
@@ -306,6 +307,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                                 var layer = $(this).data('layer');
                                 var feature = spoi_editor.addPoi(layer, coordinate, $scope.country_last_clicked);
                                 popup.setPosition(undefined);
+                                mobile_toolbar_service.togglePanelspace(true);
                                 $scope.$broadcast('infopanel.feature_select', feature);
                                 return false;
                             }
