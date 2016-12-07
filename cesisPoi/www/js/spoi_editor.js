@@ -1,0 +1,1 @@
+/home/raitis/Projects/hslayers-ng/examples/geosparql/spoi_editor.js
