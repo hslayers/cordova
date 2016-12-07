@@ -125,6 +125,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                 $scope.Core = Core;
                 Core.sidebarRight = false;
                 Core.singleDatasources = true;
+                Core.panelEnabled('draw', false);
                 // Core.panelEnabled('mobile_settings', false);
                 Core.panelEnabled('status_creator', false);
                 $scope.$on('infopanel.updated', function(event) {

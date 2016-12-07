@@ -1,8 +1,8 @@
 'use strict';
 
 define(['ol',
-        'sidebar',
         'toolbar',
+        'sidebar',
         'layermanager',
         'query',
         'search',
@@ -12,10 +12,12 @@ define(['ol',
         'bootstrap',
         'geolocation',
         'api',
+        'senslog',
         'mobile_toolbar',
         'mobile_settings',
-        'senslog',
-        'draw'
+        'draw',
+        'drag',
+        'ows'
     ],
     function(ol, toolbar) {
         var module = angular.module('hs', [
@@ -28,10 +30,12 @@ define(['ol',
             'hs.geolocation',
             'hs.api',
             'hs.sidebar',
+            'hs.senslog',
             'hs.mobile_toolbar',
             'hs.mobile_settings',
-            'hs.senslog',
-            'hs.draw'
+            'hs.draw',
+            'hs.drag',
+            'hs.ows'
         ]);
 
         module.directive(
@@ -56,16 +60,7 @@ define(['ol',
                     }),
                     title: "Base Layer",
                     base: true
-                })/*,
-                new ol.layer.Vector({
-                    title: 'Editable vector layer',
-                    visibility: true,
-                    source: new ol.source.Vector({
-                        url: 'http://portal.sdi4apps.eu/SensLog-VGI/rest/vgi/observations/select?user_name=tester&format=geojson',
-                        senslog_url: 'http://portal.sdi4apps.eu/SensLog-VGI/rest/vgi/',
-                        format: new ol.format.GeoJSON()
-                    })
-                })*/
+                })
             ],
             default_view: new ol.View({
                 center: ol.proj.transform([6.1319, 49.6116], 'EPSG:4326', 'EPSG:3857'), //Latitude longitude    to Spherical Mercator
@@ -115,26 +110,63 @@ define(['ol',
                         }
                         event.targetScope.addSenslogDataset = function() {
                             $http({
-                                    url: config.senslog_url + '/dataset/?user_name=tester',
-                                    method: 'POST',
-                                    data: {
-                                        dataset_name: event.targetScope.dataset_name,
-                                        description: event.targetScope.dataset_description
-                                    },
-                                    headers: {
-                                        "Content-Type": "application/json"
-                                    }
-                            }
-                                ).then(function(response) {
-                                    debugger;
-                                    if (response.statusText == "OK") {
-
-                                    }
-                                });
+                                url: config.senslog_url + '/dataset/?user_name=tester',
+                                method: 'POST',
+                                data: {
+                                    dataset_name: event.targetScope.dataset_name,
+                                    description: event.targetScope.dataset_description
+                                },
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
+                            }).then(function(response) {
+                                if (response.statusText == "OK") {
+                                    var source = new ol.source.Vector({
+                                        url: config.senslog_url + '/observation/?user_name=tester&dataset_id=' + response.dataset_id + '&format=geojson',
+                                        format: new ol.format.GeoJSON()
+                                    });
+                                    source.set('dataset_id', response.dataset_id);
+                                    source.set('senslog_url', config.senslog_url + '/');
+                                    var lyr = new ol.layer.Vector({
+                                        title: event.targetScope.dataset_name,
+                                        visible: false,
+                                        source: source
+                                    })
+                                    hsmap.map.addLayer(lyr);
+                                    event.targetScope.dataset_name = "";
+                                    event.targetScope.dataset_description = "";
+                                }
+                            });
                         }
+
                     }
-                })
+                    if (args == 'Map') {
+
+                        $http.get(config.senslog_url + '/category/?user_name=tester').then(function(response) {
+                            $scope.$broadcast('senslog.categories_loaded', response.data);
+                        });
+
+                        $http.get(config.senslog_url + '/dataset/?user_name=tester').then(function(response) {
+                            $scope.$broadcast('senslog.datasets_loaded', response.data);
+                            angular.forEach(response.data, function(dataset) {
+                                var source = new ol.source.Vector({
+                                    url: config.senslog_url + '/observation/?user_name=tester&dataset_id=' + dataset.dataset_id + '&format=geojson',
+                                    format: new ol.format.GeoJSON()
+                                });
+                                source.set('dataset_id', dataset.dataset_id);
+                                source.set('senslog_url', config.senslog_url + '/');
+                                var lyr = new ol.layer.Vector({
+                                    title: dataset.dataset_name,
+                                    visible: false,
+                                    source: source
+                                })
+                                hsmap.map.addLayer(lyr);
+                            })
+                        });
+                    }
+                });
                 Core.panelEnabled('compositions', false);
+
                 $scope.$on('infopanel.updated', function(event) {});
             }
         ]);

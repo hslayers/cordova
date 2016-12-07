@@ -182,6 +182,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'WfsSource', 'sidebar', 'map
                 $scope.Core = Core;
                 Core.singleDatasources = true;
                 Core.embededEnabled = false;
+                Core.panelEnabled('draw', false);
                 $scope.$on('infopanel.updated', function(event) {
                     if (console) console.log('Attributes', InfoPanelService.attributes, 'Groups', InfoPanelService.groups);
                 });

@@ -33,6 +33,7 @@ require.config({
         core: hsl_path + 'components/core/core',
         datasource_selector: hsl_path + 'components/datasource_selector/datasource_selector',
         api: hsl_path + 'components/api/api',
+        senslog: hsl_path + 'senslog/senslog',
         translations: hsl_path + 'components/translations/js/translations'
     }
 });
