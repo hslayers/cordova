@@ -34,7 +34,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
 
         var style = function(feature, resolution) {
             if (typeof feature.get('visible') === 'undefined' || feature.get('visible') == true) {
-                var s = feature.get('http://www.openvoc.eu/poi#categoryWaze');
+                var s = feature.get('http://www.sdi4apps.eu/poi/#mainCategory');
+
                 if (typeof s === 'undefined') return;
                 s = s.split("#")[1];
                 return [
@@ -54,9 +55,9 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
 
         var styleOSM = function(feature, resolution) {
             if (typeof feature.get('visible') === 'undefined' || feature.get('visible') == true) {
-                var s = feature.get('http://www.openvoc.eu/poi#categoryOSM');
+                var s = feature.get('http://www.sdi4apps.eu/poi/#mainCategory');
                 if (typeof s === 'undefined') return;
-                s = s.split(".")[1];
+                s = s.split("#")[1];
                 return [
                     new ol.style.Style({
                         image: new ol.style.Icon({
@@ -279,21 +280,31 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     getCountryAtCoordinate(coordinate);
                 });
 
-                function getCountryAtCoordinate(coordinate){
+                function getCountryAtCoordinate(coordinate) {
                     var latlng = ol.proj.transform(coordinate, OlMap.map.getView().getProjection(), 'EPSG:4326');
                     delete $scope.country_last_clicked;
                     $http.get('http://api.geonames.org/extendedFindNearby?lat={0}&lng={1}&username=raitis'.format(latlng[1], latlng[0]))
                         .then(function(response) {
-                            var country_geoname = angular.element('fcl', response.data).filter(function(index) { return angular.element(this).text() === "A"; }).parent();
+                            var country_geoname = angular.element('fcl', response.data).filter(function(index) {
+                                return angular.element(this).text() === "A";
+                            }).parent();
                             $scope.country_last_clicked = {
                                 geonameId: country_geoname.find('geonameId').html(),
                                 countryName: country_geoname.find('countryName').html(),
                                 countryCode: country_geoname.find('countryCode').html()
-                            }; 
+                            };
                             angular.element('#hs-spoi-country-placeholder').html($scope.country_last_clicked.country);
                         });
                 }
                 
+                function layerSelected() {
+                    var layer = $(this).data('layer');
+                    var feature = spoi_editor.addPoi(layer, $(this).data('coordinate'), $scope.country_last_clicked, $(this).data('sub_category'));
+                    popup.setPosition(undefined);
+                    $scope.$broadcast('infopanel.feature_select', feature);
+                    return false;
+                }
+
                 function createLayerSelectorForNewPoi(popup, coordinate) {
                     var possible_layers = [];
                     angular.element("#hs-spoi-new-layer-list").html('');
@@ -301,18 +312,20 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                         if (layer.getVisible()) {
                             possible_layers.push(layer);
                             var $li = $('<li><a href="#">' + layer.get('title') + '</a></li>');
-                            $li.data('layer', layer);
-
-                            function layerSelected() {
-                                var layer = $(this).data('layer');
-                                var feature = spoi_editor.addPoi(layer, coordinate, $scope.country_last_clicked);
-                                popup.setPosition(undefined);
-                                mobile_toolbar_service.togglePanelspace(true);
-                                $scope.$broadcast('infopanel.feature_select', feature);
-                                return false;
-                            }
-
-                            $li.click(layerSelected);
+                            $li.addClass('dropdown-submenu');
+                            var $ul = $('<ul></ul>');
+                            $ul.addClass('dropdown-menu');
+                            $li.append($ul);
+                            var category = layer.get('category');
+                            angular.forEach(spoi_editor.getCategoryHierarchy()[category], function(sub_category_label, sub_category) {
+                                var $li_subcategory = $('<li><a href="#">' + sub_category_label.capitalizeFirstLetter() + '</a></li>');
+                                $li_subcategory.data('layer', layer);
+                                $li_subcategory.data('sub_category', sub_category);
+                                $li_subcategory.data('coordinate', coordinate);
+                                $li_subcategory.click(layerSelected);
+                                $ul.append($li_subcategory);
+                            })
+                            
                             angular.element("#hs-spoi-new-layer-list").append($li);
                         }
                     });
@@ -331,6 +344,51 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                 });
 
                 var hr_mappings;
+                var list_loaded = {dynamic_categories: false, static_categories: false};
+                function checkListLoaded(){
+                    if(list_loaded.dynamic_categories && list_loaded.static_categories)
+                        OlMap.reset();
+                }
+                 var q = encodeURIComponent('SELECT DISTINCT ?main ?label ?subs ?sublabel FROM <http://www.sdi4apps.eu/poi_categories.rdf> WHERE {?subs <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?main. ?main <http://www.w3.org/2000/01/rdf-schema#label> ?label. ?subs <http://www.w3.org/2000/01/rdf-schema#label> ?sublabel} ORDER BY ?main ');  
+
+                 $http({
+                    method: 'GET',
+                    url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + q + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                    cache: false
+                }).then(function successCallback(response) {
+                    var last_main_category = '';
+                    angular.forEach(response.data.results.bindings, function(x){
+                        var category = x.main.value;
+                        spoi_editor.registerCategory(x.main.value, x.label.value, x.subs.value, x.sublabel.value);
+                        if (category != last_main_category){
+                            last_main_category = category;
+                            var name = x.label.value.capitalizeFirstLetter();
+                            var new_lyr = new ol.layer.Vector({
+                                title: " " + name,
+                                source: new SparqlJson({
+                                    geom_attribute: '?geom',
+                                    url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> FROM <http://www.sdi4apps.eu/poi_categories.rdf> WHERE { ?o <http://www.openvoc.eu/poi#class> ?sub. ?sub <http://www.w3.org/2000/01/rdf-schema#subClassOf> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                    updates_url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_categories.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#class> ?sub. ?sub <http://www.w3.org/2000/01/rdf-schema#subClassOf> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                    category_field: 'http://www.openvoc.eu/poi#class',
+                                    category: category,
+                                    projection: 'EPSG:3857'
+                                        //feature_loaded: function(feature){feature.set('hstemplate', 'hs.geosparql_directive')}
+                                }),
+                                style: style,
+                                visible: false,
+                                path: 'Points of interest',
+                                category: category
+                                    //minResolution: 1,
+                                    //maxResolution: 38
+                            });
+                            config.box_layers[1].getLayers().insertAt(0, new_lyr);
+                        }
+                    });
+                    list_loaded.dynamic_categories = true;
+                    checkListLoaded();
+                })
+                
+                
                 $http({
                     method: 'GET',
                     url: 'data.json',
@@ -338,46 +396,28 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                 }).then(function successCallback(response) {
                     hr_mappings = response.data;
                     spoi_editor.init(hr_mappings);
-                    angular.forEach(hr_mappings["http://www.openvoc.eu/poi#categoryWaze"], function(name, category) {
-                        var new_lyr = new ol.layer.Vector({
-                            title: " " + name,
-                            source: new SparqlJson({
-                                geom_attribute: '?geom',
-                                url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
-                                updates_url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryWaze> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
-                                category_field: 'http://www.openvoc.eu/poi#categoryWaze',
-                                projection: 'EPSG:3857'
-                                    //feature_loaded: function(feature){feature.set('hstemplate', 'hs.geosparql_directive')}
-                            }),
-                            style: style,
-                            visible: (name == 'Culture & Entertainment' || name == 'Food and Drink'),
-                            path: 'Points of interest',
-                            category: category
-                                //minResolution: 1,
-                                //maxResolution: 38
-                        });
-                        config.box_layers[1].getLayers().insertAt(0, new_lyr);
-                    })
                     angular.forEach(hr_mappings.popular_categories, function(name, category) {
                         var new_lyr = new ol.layer.Vector({
                             title: " " + name,
                             source: new SparqlJson({
                                 geom_attribute: '?geom',
-                                url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryOSM> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + category + '"). ') + '<extent>' + encodeURIComponent('	?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
-                                updates_url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#categoryOSM> ?filter_categ. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). FILTER (str(?filter_categ) = "' + category + '"). ') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
-                                category_field: 'http://www.openvoc.eu/poi#categoryOSM',
+                                url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?p ?s FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> FROM <http://www.sdi4apps.eu/poi_categories.rdf> WHERE { ?o <http://www.openvoc.eu/poi#class>  <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false). ') + '<extent>' + encodeURIComponent('?o ?p ?s } ORDER BY ?o') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                updates_url: 'http://data.plan4all.eu/sparql?default-graph-uri=&query=' + encodeURIComponent('SELECT ?o ?date ?attr ?value FROM <http://www.sdi4apps.eu/poi.rdf> FROM <http://www.sdi4apps.eu/poi_categories.rdf> FROM <http://www.sdi4apps.eu/poi_changes.rdf> WHERE { ?o <http://www.openvoc.eu/poi#class> <' + category + '>. ?o <http://www.opengis.net/ont/geosparql#asWKT> ?geom. FILTER(isBlank(?geom) = false).') + '<extent>' + encodeURIComponent(' ?o <http://purl.org/dc/elements/1.1/identifier> ?id. ?c <http://www.sdi4apps.eu/poi_changes/poi_id> ?id. ?c <http://purl.org/dc/terms/1.1/created> ?date. ?c <http://www.sdi4apps.eu/poi_changes/attribute_set> ?attr_set. ?attr_set ?attr ?value } ORDER BY ?o ?date ?attr ?value') + '&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on',
+                                //category_field: 'http://www.openvoc.eu/poi#class',
+                                category: category,
                                 projection: 'EPSG:3857'
                             }),
                             style: styleOSM,
                             visible: false,
                             path: 'Popular Categories',
-                            minResolution: 1,
-                            maxResolution: 38,
+                            //minResolution: 1,
+                            //maxResolution: 38,
                             category: category
                         });
                         config.box_layers[1].getLayers().insertAt(0, new_lyr);
                     })
-                    OlMap.reset();
+                    list_loaded.static_categories = true;
+                    checkListLoaded();
                 })
 
                 $scope.getSpoiCategories = spoi_editor.getSpoiCategories;
@@ -388,6 +428,19 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                 $scope.editDropdownVisible = spoi_editor.editDropdownVisible;
                 $scope.editTextboxVisible = spoi_editor.editTextboxVisible;
                 $scope.saveSpoiChanges = spoi_editor.saveSpoiChanges;
+                $scope.editCategoryDropdownVisible = spoi_editor.editCategoryDropdownVisible;
+                $scope.getSpoiDropdownItems = spoi_editor.getSpoiDropdownItems;
+
+                $scope.$on('sidebar_change', function(event, expanded) {
+                    infopanel_service.enabled = expanded;
+                })
+                
+                function splitAddress(url){
+                    return url.split('#')[1];
+                }
+                
+                $scope.splitAddress = splitAddress;
+
             }
         ]).filter('usrFrSpoiAttribs', ['spoi_editor', function(spoi_editor) {
             return spoi_editor.filterAttribs;
