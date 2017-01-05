@@ -375,7 +375,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                                         //feature_loaded: function(feature){feature.set('hstemplate', 'hs.geosparql_directive')}
                                 }),
                                 style: style,
-                                visible: false,
+                                visible: (name == 'Culture & Entertainment' || name == 'Food and Drink'),
                                 path: 'Points of interest',
                                 category: category
                                     //minResolution: 1,
