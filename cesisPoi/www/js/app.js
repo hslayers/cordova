@@ -204,7 +204,10 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     }
                 })
 
-                $scope.$on('infopanel.updated', function(event) {});
+                $scope.$on('infopanel.updated', function(event) {
+                    if(Core.mainpanel != 'info') Core.setMainPanel("info");
+                    if(!mobile_toolbar_service.panelspace0pened) mobile_toolbar_service.togglePanelspace(true);
+                });
 
                 var pop_div = document.createElement('div');
                 document.getElementsByTagName('body')[0].appendChild(pop_div);
@@ -309,22 +312,31 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     var possible_layers = [];
                     angular.element("#hs-spoi-new-layer-list").html('');
                     angular.forEach(config.box_layers[1].getLayers(), function(layer) {
-                        if (layer.getVisible()) {
+                         if (layer.getVisible()) {
                             possible_layers.push(layer);
                             var $li = $('<li><a href="#">' + layer.get('title') + '</a></li>');
-                            $li.addClass('dropdown-submenu');
-                            var $ul = $('<ul></ul>');
-                            $ul.addClass('dropdown-menu');
-                            $li.append($ul);
                             var category = layer.get('category');
-                            angular.forEach(spoi_editor.getCategoryHierarchy()[category], function(sub_category_label, sub_category) {
-                                var $li_subcategory = $('<li><a href="#">' + sub_category_label.capitalizeFirstLetter() + '</a></li>');
-                                $li_subcategory.data('layer', layer);
-                                $li_subcategory.data('sub_category', sub_category);
-                                $li_subcategory.data('coordinate', coordinate);
-                                $li_subcategory.click(layerSelected);
-                                $ul.append($li_subcategory);
-                            })
+                            if (angular.isDefined(spoi_editor.getCategoryHierarchy()[category])){
+                                //Was main category
+                                $li.addClass('dropdown-submenu');
+                                var $ul = $('<ul></ul>');
+                                $ul.addClass('dropdown-menu');
+                                $li.append($ul);
+                                angular.forEach(spoi_editor.getCategoryHierarchy()[category], function(sub_category_label, sub_category) {
+                                    var $li_subcategory = $('<li><a href="#">' + sub_category_label.capitalizeFirstLetter() + '</a></li>');
+                                    $li_subcategory.data('layer', layer);
+                                    $li_subcategory.data('sub_category', sub_category);
+                                    $li_subcategory.data('coordinate', coordinate);
+                                    $li_subcategory.click(layerSelected);
+                                    $ul.append($li_subcategory);
+                                })
+                            } else {
+                                //Was Popular category
+                                $li.data('layer', layer);
+                                $li.data('sub_category', category);
+                                $li.data('coordinate', coordinate);
+                                $li.click(layerSelected);
+                            }
                             
                             angular.element("#hs-spoi-new-layer-list").append($li);
                         }
@@ -375,7 +387,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                                         //feature_loaded: function(feature){feature.set('hstemplate', 'hs.geosparql_directive')}
                                 }),
                                 style: style,
-                                visible: (name == 'Culture & Entertainment' || name == 'Food and Drink'),
+                                visible: (name == 'Culture and entertainment' || name == 'Food and drink'),
                                 path: 'Points of interest',
                                 category: category
                                     //minResolution: 1,
@@ -430,10 +442,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                 $scope.saveSpoiChanges = spoi_editor.saveSpoiChanges;
                 $scope.editCategoryDropdownVisible = spoi_editor.editCategoryDropdownVisible;
                 $scope.getSpoiDropdownItems = spoi_editor.getSpoiDropdownItems;
-
-                $scope.$on('sidebar_change', function(event, expanded) {
-                    infopanel_service.enabled = expanded;
-                })
+                
+                infopanel_service.enabled = true;
                 
                 function splitAddress(url){
                     return url.split('#')[1];
