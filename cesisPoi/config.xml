@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.sdi4apps.cesispoi" version="0.0.3" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Cesis POI</name>
+<widget id="com.sdi4apps.spoi" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Sdi4Apps POI</name>
     <description>
-        Points of interest in Cēsis
+        Points of interest
     </description>
     <author email="raitisbe@gmail.com" href="http://sdi4apps.eu">
         SDI4apps

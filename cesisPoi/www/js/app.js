@@ -175,8 +175,8 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
             infopanel_template: hsl_path + 'infopanel.html'
         });
 
-        module.controller('Main', ['$scope', '$compile', '$filter', 'Core', 'hs.map.service', '$sce', '$http', 'config', 'hs.trip_planner.service', 'hs.permalink.service_url', 'hs.utils.service', 'spoi_editor', 'hs.mobile_toolbar.service', 'hs.query.service_infopanel', 
-            function($scope, $compile, $filter, Core, OlMap, $sce, $http, config, trip_planner_service, permalink, utils, spoi_editor, mobile_toolbar_service, infopanel_service) {
+        module.controller('Main', ['$scope', '$compile', '$filter', 'Core', 'hs.map.service', '$sce', '$http', 'config', 'hs.trip_planner.service', 'hs.permalink.service_url', 'hs.utils.service', 'spoi_editor', 'hs.mobile_toolbar.service', 'hs.query.service_infopanel', 'hs.geolocation.service', '$rootScope',  
+            function($scope, $compile, $filter, Core, OlMap, $sce, $http, config, trip_planner_service, permalink, utils, spoi_editor, mobile_toolbar_service, infopanel_service, geoloc_service, $rootScope) {
                 if (console) console.log("Main called");
                 $scope.hsl_path = hsl_path; //Get this from hslayers.js file
                 $scope.Core = Core;
@@ -202,7 +202,17 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                             config.default_view.setZoom([permalink.getParamValue('hs_z')]);
                         }
                     }
+                    if(args == 'Geolocation'){
+                        geoloc_service.toggleGps();
+                    }
                 })
+                
+                var got_location = false;
+                $rootScope.$on('geolocation.updated', function(){
+                    if(got_location) return; //Only move to location once when app loads
+                    geoloc_service.setCenter();
+                    got_location = true;
+                });
 
                 $scope.$on('infopanel.updated', function(event) {
                     if(Core.mainpanel != 'info') Core.setMainPanel("info");
