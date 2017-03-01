@@ -11,7 +11,7 @@
         <div class="panel-body">
     
         <!-- Feature Name -->
-        <div class="hs-spoi-feature-info" ng-repeat="group in InfoPanelService.groups | orderBy : name">
+        <div class="" ng-repeat="group in InfoPanelService.groups | orderBy : name">
             <div class="hs-spoi-title" ng-repeat="attribute in group.attributes | filter: {name: 'http://purl.org/dc/elements/1.1/title'}">
                 <h3 class="hs-spoi-feature-info">{{makeHumanReadable(attribute)}}</h3>
                 <div class="hs-spoi-item-controls"><button type="button" class="btn btn-xs btn-default" ng-click="startEdit(attribute)"><i class="glyphicon glyphicon-edit"></i></button></div>          
@@ -19,7 +19,7 @@
             </div>
             <br>
             <!-- User friendly attributes -->
-            <div ng-repeat="attribute in group.attributes | usrFrSpoiAttribs" class="featureInfo">
+            <div class="attribute" ng-repeat="attribute in group.attributes | usrFrSpoiAttribs" class="featureInfo">
                 <span class="hs-spoi-feature-info">{{attrToEnglish(attribute.name)}} <span ng-bind-html="makeHumanReadable(attribute)"></span></span>
                 <div class="hs-spoi-item-controls">
                     <button type="button" class="btn btn-xs btn-default" ng-click="startEdit(attribute)">
@@ -42,6 +42,7 @@
                 <button type="button" class="btn btn-primary" ng-show="attributesHaveChanged(group.attributes)" ng-click="saveSpoiChanges(group.attributes)"><translate>Save</translate></button>
                 <button type="button" class="btn btn-primary" ng-show="attributesHaveChanged(group.attributes)" ng-click="cancelSpoiChanges(group.attributes)"><translate>Cancel</translate></button>
                 <p>
+                    <br/>
                     <button class="btn btn-info" ng-click="showDeveloperInfo()">Advanced view</button>
                 </p>
             </div>

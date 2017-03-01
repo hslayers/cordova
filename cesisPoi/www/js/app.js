@@ -257,9 +257,13 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     got_location = true;
                 });
 
-                $scope.$on('infopanel.updated', function(event) {
-                    if(Core.mainpanel != 'info') Core.setMainPanel("info");
-                    if(!mobile_toolbar_service.panelspace0pened) mobile_toolbar_service.togglePanelspace(true);
+                $scope.$on('infopanel.feature_selected', function(event) {
+                    Core.setMainPanel("info", false);
+                    mobile_toolbar_service.togglePanelspace(true);
+                });
+                
+                $scope.$on('infopanel.feature_deselected', function(event) {
+                    mobile_toolbar_service.togglePanelspace(false);
                 });
 
                 var el = angular.element('<div hs.point_popup_directive></div>');
