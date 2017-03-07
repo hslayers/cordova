@@ -138,21 +138,13 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                         url: 'http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png'
                     }),
                     path: 'Roads'
-                }),
-                new ol.layer.Tile({
-                    title: "OwnTiles",
-                    visible: false,
-                    base: true,
-                    source: new ol.source.XYZ({
-                        url: 'http://ct37.sdi4apps.eu/map/{z}/{x}/{y}.png'
-                    }),
-                    path: 'Roads'
                 })
             ],
         });
         
         var tourist_layer_group = new ol.layer.Group({
             title: 'Touristic',
+            'img': 'bicycle-128.png',
             layers: []
         });
         
@@ -277,6 +269,12 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                         OlMap.map.addOverlay($scope.popup);
                         $scope.popup.added = true;
                     }
+                    /*OlMap.map.on('precompose', function(evt) {
+                        evt.context.imageSmoothingEnabled = false;
+                        evt.context.webkitImageSmoothingEnabled = false;
+                        evt.context.mozImageSmoothingEnabled = false;
+                        evt.context.msImageSmoothingEnabled = false;
+                    });*/
                 }
                 
                 $scope.addPopupToMap = addPopupToMap;
@@ -323,6 +321,7 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                 
                 $scope.addToTrip = function(){
                     trip_planner_service.addWaypoint($scope.lon_lat[0], $scope.lon_lat[1]);
+                    Core.setMainPanel('trip_planner');
                     return false;
                 }
 
