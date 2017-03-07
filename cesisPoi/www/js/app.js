@@ -257,9 +257,10 @@ define(['angular', 'ol', 'toolbar', 'layermanager', 'SparqlJson', 'sidebar', 'ma
                     got_location = true;
                 });
 
-                $scope.$on('infopanel.feature_selected', function(event) {
+                $scope.$on('infopanel.feature_selected', function(event, feature) {
                     Core.setMainPanel("info", false);
                     mobile_toolbar_service.togglePanelspace(true);
+                    $scope.lon_lat = ol.proj.transform(feature.getGeometry().flatCoordinates, 'EPSG:3857', 'EPSG:4326');
                 });
                 
                 $scope.$on('infopanel.feature_deselected', function(event) {
